@@ -1,0 +1,2 @@
+# uv package manager configuration
+link-mode = "copy"
