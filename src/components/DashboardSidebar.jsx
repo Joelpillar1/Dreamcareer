@@ -60,6 +60,16 @@ const COMPANY_COLORS = {
   'our team': { bg: '#000000', text: '#ffffff', letter: 'O', logo: '/okta-logo.png' }
 };
 
+const SECTION_LABEL_STYLE = {
+  fontSize: '0.7rem',
+  fontWeight: 700,
+  color: 'var(--text-subtle)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  paddingLeft: '8px',
+  marginBottom: '6px'
+};
+
 function getLogo(name) {
   const lower = (name || '').toLowerCase();
   for (const [k, v] of Object.entries(COMPANY_COLORS)) {
@@ -115,6 +125,8 @@ export default function DashboardSidebar({
     { label: 'All Countries', value: '', icon: '🌐', count: null },
     ...countries,
   ];
+
+  const sectionLabelStyle = SECTION_LABEL_STYLE;
 
   const locationButtonStyle = (isSelected) => ({
     display: 'flex',
