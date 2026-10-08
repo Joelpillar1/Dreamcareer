@@ -16,6 +16,15 @@ export default defineConfig({
   },
   build: {
     outDir: resolve(__dirname, 'careerhut/static'),
-    emptyOutDir: false
+    emptyOutDir: false,
+    chunkSizeWarningLimit: 1600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          icons: ['lucide-react']
+        }
+      }
+    }
   }
 })
