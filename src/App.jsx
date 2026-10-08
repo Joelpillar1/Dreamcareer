@@ -297,52 +297,82 @@ export default function App() {
     setIsLoading(true);
     setLoadProgress({ loaded: 0, total: 0 });
     try {
-      const [jobsData, compsRes] = await Promise.all([
-        fetchAllJobs(setLoadProgress),
-        fetch('/api/companies')
-      ]);
+      let rawJobs = [];
+      let compsData = null;
 
-      if (jobsData && jobsData.length > 0) {
-        const mixed = mixCompanies(jobsData);
-        setJobs(mixed);
-        setCompanies(computeCompaniesList(jobsData));
-        setCompanyLogos(computeCompanyLogos(jobsData));
-        setLoadError(null);
-        if (!selectedJob) {
-          setSelectedJob(mixed[0]);
+      // 1. Try local/live backend API first (if available)
+      try {
+        const [apiJobs, compsRes] = await Promise.all([
+          fetchAllJobs(setLoadProgress),
+          fetch('/api/companies')
+        ]);
+        if (apiJobs && apiJobs.length > 0) {
+          rawJobs = apiJobs;
         }
-      } else {
-        // Fall back to direct dataset
-        const directMixed = mixCompanies(DIRECT_CAREER_JOBS);
-        setJobs(directMixed);
-        setCompanies(computeCompaniesList(DIRECT_CAREER_JOBS));
-        setCompanyLogos(computeCompanyLogos(DIRECT_CAREER_JOBS));
-        if (!selectedJob) setSelectedJob(directMixed[0]);
+        if (compsRes && compsRes.ok) {
+          compsData = await compsRes.json();
+        }
+      } catch (apiErr) {
+        // Backend API offline (e.g. static hosting on Vercel)
       }
 
-      if (compsRes && compsRes.ok) {
-        const compsData = await compsRes.json();
-        if (compsData && compsData.length > 0) {
-          const mergedComps = {};
-          for (const c of compsData) {
-            const normalized = normalizeCompanyName(c.company);
-            if (!mergedComps[normalized]) {
-              mergedComps[normalized] = { ...c, company: normalized };
-            } else {
-              mergedComps[normalized].job_count = (mergedComps[normalized].job_count || 0) + (c.job_count || 0);
+      // 2. If API was unavailable or empty, load full 11,209+ jobs from static JSON /data/jobs.json
+      if (!rawJobs || rawJobs.length === 0) {
+        try {
+          const [staticJobsRes, staticCompsRes] = await Promise.all([
+            fetch('/data/jobs.json'),
+            fetch('/data/companies.json')
+          ]);
+          if (staticJobsRes.ok) {
+            const staticJobs = await staticJobsRes.json();
+            if (Array.isArray(staticJobs) && staticJobs.length > 0) {
+              rawJobs = staticJobs;
             }
           }
-          setCompanies(Object.values(mergedComps).sort((a, b) => (b.job_count || 0) - (a.job_count || 0)));
+          if (staticCompsRes && staticCompsRes.ok) {
+            compsData = await staticCompsRes.json();
+          }
+        } catch (staticErr) {
+          console.warn('Could not load /data/jobs.json, falling back to direct dataset', staticErr);
         }
       }
+
+      // 3. Fallback to DIRECT_CAREER_JOBS if still empty
+      if (!rawJobs || rawJobs.length === 0) {
+        rawJobs = DIRECT_CAREER_JOBS;
+      }
+
+      // 4. Mix companies and compute indexes
+      const mixed = mixCompanies(rawJobs);
+      setJobs(mixed);
+      setCompanyLogos(computeCompanyLogos(rawJobs));
+
+      if (compsData && compsData.length > 0) {
+        const mergedComps = {};
+        for (const c of compsData) {
+          const normalized = normalizeCompanyName(c.company);
+          if (!mergedComps[normalized]) {
+            mergedComps[normalized] = { ...c, company: normalized };
+          } else {
+            mergedComps[normalized].job_count = (mergedComps[normalized].job_count || 0) + (c.job_count || 0);
+          }
+        }
+        setCompanies(Object.values(mergedComps).sort((a, b) => (b.job_count || 0) - (a.job_count || 0)));
+      } else {
+        setCompanies(computeCompaniesList(rawJobs));
+      }
+
+      setLoadError(null);
+      if (!selectedJob && mixed.length > 0) {
+        setSelectedJob(mixed[0]);
+      }
     } catch (err) {
-      console.warn('Careerhut: API backend offline or unreachable. Using built-in direct company career dataset.', err);
-      setJobs(DIRECT_CAREER_JOBS);
+      console.warn('Careerhut data load fallback:', err);
+      const directMixed = mixCompanies(DIRECT_CAREER_JOBS);
+      setJobs(directMixed);
       setCompanies(computeCompaniesList(DIRECT_CAREER_JOBS));
       setCompanyLogos(computeCompanyLogos(DIRECT_CAREER_JOBS));
-      if (!selectedJob) {
-        setSelectedJob(DIRECT_CAREER_JOBS[0]);
-      }
+      if (!selectedJob) setSelectedJob(directMixed[0]);
       setLoadError(null);
     } finally {
       setIsLoading(false);
