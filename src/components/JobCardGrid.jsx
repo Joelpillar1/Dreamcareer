@@ -858,8 +858,15 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
         </div>
       </div>
 
-      {/* Bottom Action: Apply Button, Careers Page Button, & Email Outreach Button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+      {/* Bottom Action: 3 Buttons on a Single Line */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'auto 1fr 1fr',
+        alignItems: 'center',
+        gap: '6px',
+        width: '100%',
+        marginTop: 'auto'
+      }}>
         <a
           href={applyHref}
           target="_blank"
@@ -867,16 +874,17 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
           style={{
             background: '#780115',
             color: '#ffffff',
-            fontSize: '0.82rem',
+            fontSize: '0.78rem',
             fontWeight: 700,
-            padding: '7px 20px',
+            padding: '7px 14px',
             borderRadius: 0,
             border: '1px solid #780115',
             textDecoration: 'none',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '5px',
+            gap: '4px',
+            whiteSpace: 'nowrap',
             boxShadow: '0 1px 2px rgba(120, 1, 21, 0.15)',
             transition: 'all 0.15s ease'
           }}
@@ -884,26 +892,30 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#780115'}
         >
           <span>Apply</span>
-          <ArrowUpRight size={13} />
+          <ArrowUpRight size={12} />
         </a>
 
         <a
           href={careerPortalHref}
           target="_blank"
           rel="noopener noreferrer"
-          title={`Visit official ${job.company || 'company'} career page`}
+          title={`Visit official ${job.company || 'company'} careers page`}
           style={{
             background: '#ffffff',
             color: '#334155',
-            fontSize: '0.8rem',
+            fontSize: '0.76rem',
             fontWeight: 600,
-            padding: '7px 12px',
+            padding: '7px 6px',
             borderRadius: 0,
             border: '1px dashed #cbd5e1',
             textDecoration: 'none',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '5px',
+            justifyContent: 'center',
+            gap: '4px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
             transition: 'all 0.15s ease'
           }}
           onMouseEnter={(e) => {
@@ -917,24 +929,29 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
             e.currentTarget.style.background = '#ffffff';
           }}
         >
-          <Globe size={13} color="currentColor" />
-          <span>Careers Page</span>
+          <Globe size={12} color="currentColor" style={{ flexShrink: 0 }} />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>Careers</span>
         </a>
 
         <button
           onClick={() => onOpenReachout(job)}
+          title="Open Company Outreach & Hiring Team Directory"
           style={{
             background: '#fff1f2',
             color: '#780115',
-            fontSize: '0.8rem',
+            fontSize: '0.76rem',
             fontWeight: 700,
-            padding: '7px 14px',
+            padding: '7px 6px',
             borderRadius: 0,
             border: '1px dashed #780115',
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '5px',
+            justifyContent: 'center',
+            gap: '4px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
             transition: 'all 0.15s ease'
           }}
           onMouseEnter={(e) => {
@@ -944,8 +961,8 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
             e.currentTarget.style.background = '#fff1f2';
           }}
         >
-          <Mail size={13} color="#780115" />
-          <span>Outreach Emails</span>
+          <Mail size={12} color="#780115" style={{ flexShrink: 0 }} />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>Outreach</span>
         </button>
       </div>
     </div>
