@@ -1010,13 +1010,16 @@ export default function JobCardGrid({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Cards 3-Column Responsive Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-        gap: '20px',
-        alignItems: 'stretch'
-      }}>
+      {/* Cards 3-Column Responsive Grid (Strict 3 Cards Per Row) */}
+      <div 
+        className="careerhut-3col-grid"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          gap: '20px',
+          alignItems: 'stretch'
+        }}
+      >
         {visibleJobs.map((job) => (
           <JobCard 
             key={job.id} 

@@ -7,7 +7,7 @@ import FilterModal from './components/FilterModal';
 import LandingPage from './components/LandingPage';
 import JobCardGrid from './components/JobCardGrid';
 import { DIRECT_CAREER_JOBS } from './data/directJobs';
-import { buildLocationLists, countriesFromLocation, regionsFromLocation } from './utils/locations';
+import { buildLocationLists, jobGeo } from './utils/locations';
 import { resolveLogoUrl } from './components/CompanyLogo';
 
 function normalizeCompanyName(name) {
@@ -490,9 +490,8 @@ export default function App() {
   const locationIndex = useMemo(() => {
     const index = new Map();
     for (const job of jobs) {
-      const countries = countriesFromLocation(job.location, job.country).map((c) => c.toLowerCase());
-      const regions = countries.length ? [] : regionsFromLocation(job.location);
-      index.set(job, { countries, regions });
+      const { countries, regions } = jobGeo(job.location, job.country);
+      index.set(job, { countries: countries.map((c) => c.toLowerCase()), regions });
     }
     return index;
   }, [jobs]);

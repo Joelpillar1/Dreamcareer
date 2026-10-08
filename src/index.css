@@ -237,3 +237,24 @@ body {
   }
 }
 
+/* Strict 3-Cards Per Row Grid */
+.careerhut-3col-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 20px !important;
+  align-items: stretch !important;
+}
+
+@media (max-width: 1180px) {
+  .careerhut-3col-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .careerhut-3col-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+

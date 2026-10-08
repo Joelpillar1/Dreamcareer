@@ -297,6 +297,26 @@ export function regionsFromLocation(location) {
 }
 
 /**
+ * Region bucket that only applies to roles with no country at all
+ * ("Remote", "Distributed", "Global" ...). Remote roles that *do* have a
+ * country belong under that country, not here.
+ */
+const REMOTE_GLOBAL = 'remote / global';
+
+/**
+ * Resolve one job's location into canonical countries + regions.
+ * Used for BOTH the sidebar counts and the filter so the two always agree.
+ * @returns {{countries:string[], regions:string[]}}
+ */
+export function jobGeo(location, country) {
+  const countries = countriesFromLocation(location, country);
+  const regions = regionsFromLocation(location).filter(
+    (r) => r !== REMOTE_GLOBAL || countries.length === 0
+  );
+  return { countries, regions };
+}
+
+/**
  * Build the sidebar location lists from every loaded job.
  * @param {Array<{location?:string,country?:string}>} jobs
  * @returns {{countries:Array<{label,value,icon,count}>, regions:Array<{label,value,icon,count}>}}
@@ -306,13 +326,9 @@ export function buildLocationLists(jobs) {
   const regionCounts = new Map();
 
   for (const job of jobs || []) {
-    const loc = job.location || '';
-    const countries = countriesFromLocation(loc, job.country);
-    if (countries.length) {
-      for (const c of countries) countryCounts.set(c, (countryCounts.get(c) || 0) + 1);
-    } else {
-      for (const r of regionsFromLocation(loc)) regionCounts.set(r, (regionCounts.get(r) || 0) + 1);
-    }
+    const { countries, regions } = jobGeo(job.location, job.country);
+    for (const c of countries) countryCounts.set(c, (countryCounts.get(c) || 0) + 1);
+    for (const r of regions) regionCounts.set(r, (regionCounts.get(r) || 0) + 1);
   }
 
   const flagFor = new Map(COUNTRIES.map(([n, f]) => [n, f]));
