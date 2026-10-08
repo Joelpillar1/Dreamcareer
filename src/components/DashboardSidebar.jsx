@@ -79,6 +79,8 @@ export default function DashboardSidebar({
   onSelectWorkplace,
   selectedLocation,
   onSelectLocation,
+  countries = [],
+  regions = [],
   hasEmailOnly,
   onToggleHasEmail,
   onlyBookmarked,
@@ -107,17 +109,65 @@ export default function DashboardSidebar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [profileOpen]);
 
-  const TOP_COUNTRIES = [
-    { label: 'All Countries', value: '', icon: '🌐' },
-    { label: 'United States', value: 'United States', icon: '🇺🇸' },
-    { label: 'Canada', value: 'Canada', icon: '🇨🇦' },
-    { label: 'Ireland', value: 'Ireland', icon: '🇮🇪' },
-    { label: 'United Kingdom', value: 'United Kingdom', icon: '🇬🇧' },
-    { label: 'Singapore', value: 'Singapore', icon: '🇸🇬' },
-    { label: 'Japan', value: 'Japan', icon: '🇯🇵' },
-    { label: 'Australia', value: 'Australia', icon: '🇦🇺' },
-    { label: 'Europe / CEE', value: 'Europe', icon: '🇪🇺' }
+  // Every country that has at least one loaded role, resolved from the job
+  // data itself (see src/utils/locations.js) and sorted by role count.
+  const locationItems = [
+    { label: 'All Countries', value: '', icon: '🌐', count: null },
+    ...countries,
   ];
+
+  const locationButtonStyle = (isSelected) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '6px 10px',
+    borderRadius: 'var(--radius-sm)',
+    background: isSelected ? 'var(--primary-light)' : 'transparent',
+    color: isSelected ? 'var(--primary-text)' : 'var(--text-main)',
+    fontWeight: isSelected ? 700 : 500,
+    fontSize: '0.82rem',
+    border: 'none',
+    cursor: 'pointer',
+    textAlign: 'left',
+    transition: 'var(--transition)'
+  });
+
+  const renderLocationButton = (item, showCount) => {
+    const isSelected = selectedLocation === item.value;
+    return (
+      <button
+        key={item.value || item.label}
+        title={showCount && item.count != null ? `${item.count} roles in ${item.label}` : item.label}
+        onClick={() => onSelectLocation(isSelected ? '' : item.value)}
+        style={locationButtonStyle(isSelected)}
+        onMouseEnter={(e) => {
+          if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
+        }}
+        onMouseLeave={(e) => {
+          if (!isSelected) e.currentTarget.style.background = 'transparent';
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+          <span>{item.icon}</span>
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {item.label}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {showCount && item.count != null && (
+            <span style={{
+              fontSize: '0.7rem',
+              fontWeight: 600,
+              color: isSelected ? 'var(--primary-text)' : 'var(--text-subtle)'
+            }}>
+              {item.count}
+            </span>
+          )}
+          {isSelected && <CheckCircle2 size={13} color="var(--primary)" />}
+        </div>
+      </button>
+    );
+  };
 
   return (
     <aside style={{
@@ -430,58 +480,31 @@ export default function DashboardSidebar({
         </div>
 
 
-        {/* Section 4: Country Shortcuts */}
+        {/* Section 4: Locations -- every country with roles, from the data */}
         <div>
-          <div style={{
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            color: 'var(--text-subtle)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            paddingLeft: '8px',
-            marginBottom: '6px'
-          }}>
-            Top Locations
+          <div style={sectionLabelStyle}>
+            Countries
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            {TOP_COUNTRIES.map((c) => {
-              const isSelected = selectedLocation === c.value;
-              return (
-                <button
-                  key={c.label}
-                  onClick={() => onSelectLocation(isSelected ? '' : c.value)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '6px 10px',
-                    borderRadius: 'var(--radius-sm)',
-                    background: isSelected ? 'var(--primary-light)' : 'transparent',
-                    color: isSelected ? 'var(--primary-text)' : 'var(--text-main)',
-                    fontWeight: isSelected ? 700 : 500,
-                    fontSize: '0.8rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'var(--transition)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>{c.icon}</span>
-                    <span>{c.label}</span>
-                  </div>
-                  {isSelected && <CheckCircle2 size={13} color="var(--primary)" />}
-                </button>
-              );
-            })}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+            maxHeight: '320px',
+            overflowY: 'auto',
+            paddingRight: '2px'
+          }}>
+            {locationItems.map((item) => renderLocationButton(item, true))}
           </div>
+
+          {regions.length > 0 && (
+            <div style={{ marginTop: '14px' }}>
+              <div style={sectionLabelStyle}>Regions</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                {regions.map((item) => renderLocationButton(item, true))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -7,6 +7,8 @@ import FilterModal from './components/FilterModal';
 import LandingPage from './components/LandingPage';
 import JobCardGrid from './components/JobCardGrid';
 import { DIRECT_CAREER_JOBS } from './data/directJobs';
+import { buildLocationLists, countriesFromLocation, regionsFromLocation } from './utils/locations';
+import { resolveLogoUrl } from './components/CompanyLogo';
 
 function normalizeCompanyName(name) {
   if (!name) return name;
@@ -18,56 +20,14 @@ function normalizeCompanyName(name) {
 }
 
 function computeCompanyLogos(jobList) {
-  const map = {
-    Bret: '/bret-logo.png',
-    bret: '/bret-logo.png',
-    Brex: '/bret-logo.png',
-    brex: '/bret-logo.png',
-    Palantir: '/palantir-logo.png',
-    palantir: '/palantir-logo.png',
-    Miro: '/miro-logo.png',
-    miro: '/miro-logo.png',
-    Runway: '/runway-logo.png',
-    runway: '/runway-logo.png',
-    Supabase: '/supabase-logo.png',
-    supabase: '/supabase-logo.png',
-    Duolingo: '/duolingo-logo.png',
-    duolingo: '/duolingo-logo.png',
-    Temporal: '/temporal-logo.png',
-    temporal: '/temporal-logo.png',
-    Vercel: '/vercel-logo.png',
-    vercel: '/vercel-logo.png',
-    Intercom: '/intercom-logo.png',
-    intercom: '/intercom-logo.png',
-    Cohere: '/cohere-logo.png',
-    cohere: '/cohere-logo.png',
-    Twilio: '/twilio-logo.png',
-    twilio: '/twilio-logo.png',
-    Cursor: '/cursor-logo.png',
-    cursor: '/cursor-logo.png',
-    'Cursor (Anysphere)': '/cursor-logo.png',
-    Notion: '/notion-logo.png',
-    notion: '/notion-logo.png',
-    Figma: '/figma-logo.png',
-    figma: '/figma-logo.png',
-    Airtable: '/airtable-logo.png',
-    airtable: '/airtable-logo.png',
-    MongoDB: '/mongodb-logo.png',
-    mongodb: '/mongodb-logo.png',
-    Docker: '/docker-logo.png',
-    docker: '/docker-logo.png',
-    Okta: '/okta-logo.png',
-    okta: '/okta-logo.png',
-    'Our Team': '/okta-logo.png',
-    'our team': '/okta-logo.png',
-    PostHog: 'https://posthog.com/brand/posthog-logo.png',
-    posthog: 'https://posthog.com/brand/posthog-logo.png'
-  };
+  const map = {};
   for (const j of jobList) {
     const comp = normalizeCompanyName(j.company);
-    const logo = j.company_logo || j.logoUrl;
-    if (comp && logo && !map[comp]) {
-      map[comp] = logo;
+    if (comp && !map[comp]) {
+      const logo = resolveLogoUrl(j) || resolveLogoUrl(comp);
+      if (logo) {
+        map[comp] = logo;
+      }
     }
   }
   return map;
@@ -522,8 +482,26 @@ export default function App() {
   };
 
   // Filtered Jobs
+  // Free-form location strings ("San Francisco, CA | New York City, NY",
+  // "Remote - India") are resolved to canonical countries/regions once per
+  // job, so the sidebar can list every country that actually has roles and
+  // the location filter can match on them (a plain substring test on
+  // job.location misses "San Francisco, CA" when the filter says "United States").
+  const locationIndex = useMemo(() => {
+    const index = new Map();
+    for (const job of jobs) {
+      const countries = countriesFromLocation(job.location, job.country).map((c) => c.toLowerCase());
+      const regions = countries.length ? [] : regionsFromLocation(job.location);
+      index.set(job, { countries, regions });
+    }
+    return index;
+  }, [jobs]);
+
+  const locationLists = useMemo(() => buildLocationLists(jobs), [jobs]);
+
   const filteredJobs = useMemo(() => {
     const searchTarget = (keyword || activeTag).toLowerCase().trim();
+    const locationTarget = (location || '').toLowerCase().trim();
 
     return jobs.filter((job) => {
       const titleStr = (job.title || job.role || '').toLowerCase();
@@ -532,18 +510,23 @@ export default function App() {
       const countryStr = (job.country || '').toLowerCase();
       const locStr = (job.location || '').toLowerCase();
       const compStr = (job.company || '').toLowerCase();
+      const geo = locationIndex.get(job);
 
       const matchSearch = !searchTarget ||
         titleStr.includes(searchTarget) ||
         descStr.includes(searchTarget) ||
         deptStr.includes(searchTarget) ||
         countryStr.includes(searchTarget) ||
+        (geo && geo.countries.includes(searchTarget)) ||
         locStr.includes(searchTarget) ||
         compStr.includes(searchTarget);
 
       const wp = (job.workplace_type || job.workplace || '').toLowerCase();
       const matchWorkplace = !workplace || wp.includes(workplace.toLowerCase());
-      const matchLocation = !location || locStr.includes(location.toLowerCase()) || countryStr.includes(location.toLowerCase());
+      const matchLocation = !locationTarget ||
+        (geo && (geo.countries.includes(locationTarget) || geo.regions.includes(locationTarget))) ||
+        locStr.includes(locationTarget) ||
+        countryStr.includes(locationTarget);
       const matchCompany = !company || job.company === company;
       const email = job.contact_email || job.recruiterEmail;
       const matchEmail = !hasEmail || (email && email.length > 0);
@@ -557,7 +540,7 @@ export default function App() {
     }
 
     return mixCompanies(filtered);
-  }, [jobs, keyword, activeTag, workplace, location, company, hasEmail, onlyBookmarked]);
+  }, [jobs, keyword, activeTag, workplace, location, locationIndex, company, hasEmail, onlyBookmarked]);
 
   const bookmarkedCount = jobs.filter((j) => j.is_bookmarked).length;
 
@@ -599,6 +582,8 @@ export default function App() {
         onSelectWorkplace={setWorkplace}
         selectedLocation={location}
         onSelectLocation={setLocation}
+        countries={locationLists.countries}
+        regions={locationLists.regions}
         hasEmailOnly={hasEmail}
         onToggleHasEmail={setHasEmail}
         onlyBookmarked={onlyBookmarked}

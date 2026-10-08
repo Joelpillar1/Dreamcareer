@@ -1,9 +1,183 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 // ==========================================
-// 1. BUILT-IN VECTOR BRAND LOGOS (100% Reliable SVG Icons)
+// 1. BUILT-IN VECTOR BRAND LOGOS (100% Crisp SVGs, 0 External Dependencies)
 // ==========================================
 const BRAND_SVGS = {
+  coinbase: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#0052FF" />
+      <circle cx="24" cy="24" r="13" fill="#ffffff" />
+      <rect x="21" y="21" width="6" height="6" rx="1.5" fill="#0052FF" />
+    </svg>
+  ),
+  snap: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#FFFC00" />
+      <path d="M24 11C18.5 11 16 15 16 19.5C16 21 16.5 22.2 17.2 23C16.8 23.4 15.8 23.8 14.5 24C14 24.1 13.8 24.7 14.2 25C15.2 25.7 16.8 26 18 25.7C18.5 27.2 19.5 28.7 20.5 29.2C19 29.7 17 30.7 16.5 32.2C16.2 33 16.8 33.7 17.6 33.7C19.5 33.7 21.5 32.2 24 32.2C26.5 32.2 28.5 33.7 30.4 33.7C31.2 33.7 31.8 33 31.5 32.2C31 30.7 29 29.7 27.5 29.2C28.5 28.7 29.5 27.2 30 25.7C31.2 26 32.8 25.7 33.8 25C34.2 24.7 34 24.1 33.5 24C32.2 23.8 31.2 23.4 30.8 23C31.5 22.2 32 21 32 19.5C32 15 29.5 11 24 11Z" fill="#ffffff" stroke="#000000" strokeWidth="1.8" strokeLinejoin="round" />
+    </svg>
+  ),
+  grafana: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#1F232B" />
+      <path d="M24 9C19 15 14 21 14 27C14 33.6 18.5 39 24 39C29.5 39 34 33.6 34 27C34 21 29 15 24 9Z" fill="#F46800" />
+      <path d="M24 17C21 21 18 25 18 29C18 32.3 20.7 35 24 35C27.3 35 30 32.3 30 29C30 25 27 21 24 17Z" fill="#FF9900" />
+      <circle cx="24" cy="29" r="3.5" fill="#ffffff" />
+    </svg>
+  ),
+  anthropic: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#18181B" />
+      <path d="M24 10L13 36H18.8L21 30.5H27L29.2 36H35L24 10ZM22.5 26L24 21.5L25.5 26H22.5Z" fill="#D97706" />
+    </svg>
+  ),
+  datadog: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#632CA6" />
+      <path d="M16 16C16 14 18 12 21 12H27C30 12 32 14 32 16V22C32 25 30 27 27 27H25V33C25 34.5 23.5 36 22 36C20.5 36 19 34.5 19 33V26C17 25.5 16 24 16 22V16Z" fill="#ffffff" />
+      <circle cx="27" cy="18" r="2.2" fill="#632CA6" />
+      <path d="M21 17L18 20" stroke="#632CA6" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  ),
+  databricks: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#1B1B1D" />
+      <path d="M24 10L36 17L24 24L12 17L24 10Z" fill="#FF3621" />
+      <path d="M12 21L24 28L36 21L36 25L24 32L12 25V21Z" fill="#FF3621" />
+      <path d="M12 28L24 35L36 28L36 32L24 39L12 32V28Z" fill="#FF3621" />
+    </svg>
+  ),
+  cloudflare: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+      <path d="M29.5 19C28.8 15.5 25.8 13 22 13C17.6 13 14 16.6 14 21C14 21.4 14 21.7 14.1 22.1C12.3 22.8 11 24.5 11 26.5C11 29 13 31 15.5 31H34.5C36.4 31 38 29.4 38 27.5C38 25.7 36.6 24.2 34.8 24C34.6 21.2 32.3 19 29.5 19Z" fill="#F38020" />
+      <path d="M29.5 19C28.8 15.5 25.8 13 22 13C19.5 13 17.3 14.2 16 16.1C17.2 16.7 18.2 17.7 18.7 19C19.6 18.4 20.8 18 22 18C24.8 18 27 20.2 27 23H29.5C30.9 23 32 24.1 32 25.5C32 25.7 32 25.8 31.9 26H34.5C35.9 26 37 27.1 37 28.5C37 28.7 37 28.8 36.9 29C37.6 28.2 38 27.2 38 26C38 23.8 36.2 22 34 22C33.8 19.8 31.9 19 29.5 19Z" fill="#FAAE40" />
+    </svg>
+  ),
+  snowflake: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#001529" />
+      <path d="M24 10V38M12 17L36 31M12 31L36 17" stroke="#29B5E8" strokeWidth="3" strokeLinecap="round" />
+      <path d="M20 13L24 10L28 13M20 35L24 38L28 35" stroke="#29B5E8" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M14 21L12 17L16 15M34 33L36 31L32 27" stroke="#29B5E8" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M14 27L12 31L16 33M34 15L36 17L32 21" stroke="#29B5E8" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  ),
+  elastic: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#005571" />
+      <circle cx="17" cy="24" r="5" fill="#FED10A" />
+      <circle cx="31" cy="24" r="5" fill="#00BFB3" />
+      <rect x="20" y="21.5" width="8" height="5" rx="2.5" fill="#F04E98" />
+    </svg>
+  ),
+  crowdstrike: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#000000" />
+      <path d="M12 32L24 12L36 32L28 28L24 20L20 28L12 32Z" fill="#E01E26" />
+      <path d="M24 24L26 36H22L24 24Z" fill="#ffffff" />
+    </svg>
+  ),
+  gitlab: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#292961" />
+      <path d="M24 38L36 25.5L32 12L24 38Z" fill="#E24329" />
+      <path d="M24 38L12 25.5L16 12L24 38Z" fill="#E24329" />
+      <path d="M24 38L32 12H16L24 38Z" fill="#FC6D26" />
+      <path d="M36 25.5L40 20C40.5 19 39.5 18 38.5 18.5L36 20.5V25.5Z" fill="#FCA326" />
+      <path d="M12 25.5L8 20C7.5 19 8.5 18 9.5 18.5L12 20.5V25.5Z" fill="#FCA326" />
+    </svg>
+  ),
+  deel: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#15357A" />
+      <path d="M16 14H24C29.5 14 34 18.5 34 24C34 29.5 29.5 34 24 34H16V14Z" fill="#22C55E" />
+      <path d="M21 19H24C26.8 19 29 21.2 29 24C29 26.8 26.8 29 24 29H21V19Z" fill="#15357A" />
+    </svg>
+  ),
+  linear: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#5E6AD2" />
+      <path d="M13 35L35 13M13 25L25 13M23 35L35 23" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  ),
+  ramp: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#000000" />
+      <path d="M13 34L25 14L35 34H27L25 24L19 34H13Z" fill="#E2F952" />
+    </svg>
+  ),
+  canva: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#00C4CC" />
+      <circle cx="24" cy="24" r="11" fill="none" stroke="#ffffff" strokeWidth="3.5" strokeDasharray="50 15" />
+    </svg>
+  ),
+  reddit: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#FF4500" />
+      <ellipse cx="24" cy="25" rx="10" ry="7.5" fill="#ffffff" />
+      <circle cx="20" cy="24" r="2" fill="#FF4500" />
+      <circle cx="28" cy="24" r="2" fill="#FF4500" />
+      <path d="M21 28C22.5 29.5 25.5 29.5 27 28" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="13" cy="24" r="2.5" fill="#ffffff" />
+      <circle cx="35" cy="24" r="2.5" fill="#ffffff" />
+    </svg>
+  ),
+  airbnb: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#FF5A5F" />
+      <path d="M24 12C20.5 12 18 15 18 18C18 22.5 24 30 24 35C24 30 30 22.5 30 18C30 15 27.5 12 24 12ZM24 20C22.6 20 21.5 18.9 21.5 17.5C21.5 16.1 22.6 15 24 15C25.4 15 26.5 16.1 26.5 17.5C26.5 18.9 25.4 20 24 20Z" fill="#ffffff" />
+    </svg>
+  ),
+  scale: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#000000" />
+      <path d="M14 18H34V22H14V18ZM14 26H28V30H14V26Z" fill="#ffffff" />
+      <circle cx="32" cy="28" r="2" fill="#D946EF" />
+    </svg>
+  ),
+  affirm: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#004BFF" />
+      <path d="M14 34C14 23 23 14 34 14V19C25.7 19 19 25.7 19 34H14Z" fill="#00D4B2" />
+      <circle cx="28" cy="28" r="4.5" fill="#ffffff" />
+    </svg>
+  ),
+  docusign: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#002D72" />
+      <rect x="14" y="14" width="20" height="20" rx="3" fill="#FFD000" />
+      <path d="M18 24L22 28L30 20" stroke="#002D72" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  sentry: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#362D59" />
+      <path d="M24 10L36 34H29L24 23L19 34H12L24 10Z" fill="#FF3E6C" />
+    </svg>
+  ),
+  discord: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#5865F2" />
+      <path d="M32 16C29.5 15 27.5 14.5 25 14.5L24.5 15.5C27 16.2 28.5 17.2 30 18.5C26 16.5 22 16 18 18.5C19.5 17.2 21 16.2 23.5 15.5L23 14.5C20.5 14.5 18.5 15 16 16C12.5 21 11.5 26 12 31C14.5 33 17 33.5 19.5 33.5L20.5 32C19 31.5 18 30.5 17 29.5C17.5 29.8 18 30.2 18.5 30.5C22 32.5 26 32.5 29.5 30.5C30 30.2 30.5 29.8 31 29.5C30 30.5 29 31.5 27.5 32L28.5 33.5C31 33.5 33.5 33 36 31C36.5 26 35.5 21 32 16ZM18.5 27C17.4 27 16.5 25.9 16.5 24.5C16.5 23.1 17.4 22 18.5 22C19.6 22 20.5 23.1 20.5 24.5C20.5 25.9 19.6 27 18.5 27ZM29.5 27C28.4 27 27.5 25.9 27.5 24.5C27.5 23.1 28.4 22 29.5 22C30.6 22 31.5 23.1 31.5 24.5C31.5 25.9 30.6 27 29.5 27Z" fill="#ffffff" />
+    </svg>
+  ),
+  slack: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#4A154B" />
+      <rect x="14" y="21" width="9" height="4" rx="2" fill="#36C5F0" />
+      <rect x="25" y="21" width="9" height="4" rx="2" fill="#2EB67D" />
+      <rect x="21" y="14" width="4" height="9" rx="2" fill="#ECB22E" />
+      <rect x="21" y="25" width="4" height="9" rx="2" fill="#E01E5A" />
+    </svg>
+  ),
+  github: (size) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="10" fill="#181717" />
+      <path d="M24 11C16.8 11 11 16.8 11 24C11 29.8 14.7 34.6 20 36.4C20.6 36.5 20.9 36.1 20.9 35.8V33.6C17.3 34.4 16.5 32 16.5 32C15.9 30.5 15.1 30.1 15.1 30.1C13.9 29.3 15.2 29.3 15.2 29.3C16.5 29.4 17.2 30.6 17.2 30.6C18.4 32.6 20.3 32 21 31.7C21.1 30.8 21.5 30.2 21.9 29.8C19 29.5 16 28.4 16 23.4C16 22 16.5 20.8 17.3 19.9C17.2 19.6 16.7 18.3 17.4 16.5C17.4 16.5 18.5 16.1 21 17.8C22 17.5 23.1 17.4 24.1 17.4C25.1 17.4 26.2 17.5 27.2 17.8C29.7 16.1 30.8 16.5 30.8 16.5C31.5 18.3 31 19.6 30.9 19.9C31.7 20.8 32.2 22 32.2 23.4C32.2 28.4 29.2 29.5 26.3 29.8C26.8 30.2 27.2 31 27.2 32.2V35.8C27.2 36.1 27.4 36.5 28.1 36.4C33.3 34.6 37 29.8 37 24C37 16.8 31.2 11 24 11Z" fill="#ffffff" />
+    </svg>
+  ),
   palantir: (size) => (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="48" height="48" rx="10" fill="#0f172a" />
@@ -277,13 +451,58 @@ const COMPANY_COLORS = {
   mongodb: { bg: '#001e2b', text: '#00ed64', letter: 'M' },
   docker: { bg: '#0b132b', text: '#2496ed', letter: 'D' },
   okta: { bg: '#00297a', text: '#ffffff', letter: 'O' },
-  posthog: { bg: '#1d1f27', text: '#f54e00', letter: 'P' }
+  posthog: { bg: '#1d1f27', text: '#f54e00', letter: 'P' },
+  coinbase: { bg: '#eef4ff', text: '#0052ff', letter: 'C' },
+  snap: { bg: '#fffee0', text: '#000000', letter: 'S' },
+  grafana: { bg: '#fff7ed', text: '#f46800', letter: 'G' },
+  datadog: { bg: '#f5f3ff', text: '#632ca6', letter: 'D' },
+  cloudflare: { bg: '#fff7ed', text: '#f38020', letter: 'C' },
+  snowflake: { bg: '#f0f9ff', text: '#29b5e8', letter: 'S' },
+  elastic: { bg: '#f0fdfa', text: '#005571', letter: 'E' },
+  crowdstrike: { bg: '#fef2f2', text: '#e01e26', letter: 'C' },
+  gitlab: { bg: '#fff7ed', text: '#fc6d26', letter: 'G' },
+  deel: { bg: '#eff6ff', text: '#15357a', letter: 'D' },
+  linear: { bg: '#eef2ff', text: '#5e6ad2', letter: 'L' },
+  ramp: { bg: '#000000', text: '#e2f952', letter: 'R' },
+  canva: { bg: '#ecfeff', text: '#00c4cc', letter: 'C' },
+  reddit: { bg: '#fff7ed', text: '#ff4500', letter: 'R' },
+  scale: { bg: '#000000', text: '#d946ef', letter: 'S' },
+  affirm: { bg: '#eff6ff', text: '#004bff', letter: 'A' },
+  docusign: { bg: '#eff6ff', text: '#002d72', letter: 'D' },
+  sentry: { bg: '#faf5ff', text: '#ff3e6c', letter: 'S' },
+  discord: { bg: '#eef2ff', text: '#5865f2', letter: 'D' },
+  slack: { bg: '#fdf4ff', text: '#4a154b', letter: 'S' },
+  github: { bg: '#181717', text: '#ffffff', letter: 'G' }
 };
 
 /** Normalizes company key string for matching */
-function getCompanyKey(name) {
+export function getCompanyKey(name) {
   if (!name) return '';
   const lower = String(name).toLowerCase().trim();
+  if (lower.includes('coinbase')) return 'coinbase';
+  if (lower.includes('snap') || lower.includes('snapchat')) return 'snap';
+  if (lower.includes('grafana')) return 'grafana';
+  if (lower.includes('anthropic') || lower.includes('claude')) return 'anthropic';
+  if (lower.includes('datadog')) return 'datadog';
+  if (lower.includes('databricks')) return 'databricks';
+  if (lower.includes('cloudflare')) return 'cloudflare';
+  if (lower.includes('snowflake')) return 'snowflake';
+  if (lower.includes('elastic') || lower.includes('elasticsearch')) return 'elastic';
+  if (lower.includes('crowdstrike')) return 'crowdstrike';
+  if (lower.includes('gitlab')) return 'gitlab';
+  if (lower.includes('deel')) return 'deel';
+  if (lower.includes('linear')) return 'linear';
+  if (lower.includes('ramp')) return 'ramp';
+  if (lower.includes('canva')) return 'canva';
+  if (lower.includes('reddit')) return 'reddit';
+  if (lower.includes('airbnb')) return 'airbnb';
+  if (lower.includes('scale ai') || lower === 'scale') return 'scale';
+  if (lower.includes('affirm')) return 'affirm';
+  if (lower.includes('docusign')) return 'docusign';
+  if (lower.includes('sentry')) return 'sentry';
+  if (lower.includes('discord')) return 'discord';
+  if (lower.includes('slack')) return 'slack';
+  if (lower.includes('github')) return 'github';
   if (lower.includes('posthog')) return 'posthog';
   if (lower.includes('palantir')) return 'palantir';
   if (lower.includes('supabase')) return 'supabase';
@@ -311,25 +530,27 @@ function getCompanyKey(name) {
   if (lower.includes('amazon') || lower.includes('aws')) return 'amazon';
   if (lower.includes('netflix')) return 'netflix';
   if (lower.includes('spotify')) return 'spotify';
-  return lower;
+  if (lower.includes('shopify')) return 'shopify';
+  return lower.replace(/[^a-z0-9]/g, '');
 }
 
 /** Resolve a logo URL from any of the shapes the app receives (API or static data). */
 export function resolveLogoUrl(source) {
   if (!source) return null;
-  if (typeof source === 'string') {
-    const key = getCompanyKey(source);
-    if (key && BRAND_SVGS[key]) {
-      return `/${key}-logo.png`;
-    }
-    return source;
-  }
-  const compName = source.company || source.name || '';
+  const compName = typeof source === 'string' ? source : (source.company || source.name || '');
   const key = getCompanyKey(compName);
-  if (key && BRAND_SVGS[key]) {
-    return `/${key}-logo.png`;
+
+  if (typeof source === 'object' && (source.company_logo || source.logoUrl || source.companyLogo)) {
+    return source.company_logo || source.logoUrl || source.companyLogo;
   }
-  return source.company_logo || source.logoUrl || source.companyLogo || null;
+
+  // Smart CDN favicon fallback for long-tail companies
+  const cleanSlug = compName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (cleanSlug) {
+    return `https://www.google.com/s2/favicons?domain=${cleanSlug}.com&sz=128`;
+  }
+
+  return null;
 }
 
 export function letterAvatar(name) {
@@ -357,7 +578,7 @@ export function letterAvatar(name) {
 /**
  * High-performance CompanyLogo component:
  * 1. Always checks the high-fidelity SVG icon library for immediate, crisp rendering.
- * 2. Falls back to external image URL if provided.
+ * 2. Falls back to external image URL or domain icon if provided.
  * 3. Gracefully falls back to stylized letter avatar on failure.
  */
 export default function CompanyLogo({ src, logoUrl, name, company, size = 38, radius = 8, style }) {
