@@ -3,17 +3,10 @@ import {
   Compass, 
   Bookmark, 
   Mail, 
-  Layers, 
-  Sparkles, 
-  Building2, 
-  Globe, 
-  Laptop, 
-  Briefcase, 
-  PlusCircle, 
   ChevronRight,
+  ChevronLeft,
   ChevronUp,
   ChevronDown,
-  SlidersHorizontal,
   CheckCircle2,
   Settings,
   User,
@@ -21,8 +14,8 @@ import {
   Sun,
   Moon,
   Bell,
-  FileText,
-  Check
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -70,14 +63,6 @@ const SECTION_LABEL_STYLE = {
   marginBottom: '6px'
 };
 
-function getLogo(name) {
-  const lower = (name || '').toLowerCase();
-  for (const [k, v] of Object.entries(COMPANY_COLORS)) {
-    if (lower.includes(k)) return v;
-  }
-  return { bg: '#f1f5f9', text: '#475569', letter: (name || 'C').charAt(0).toUpperCase() };
-}
-
 export default function DashboardSidebar({
   totalJobsCount,
   bookmarkedCount,
@@ -98,9 +83,20 @@ export default function DashboardSidebar({
   onResetFilters,
   onGoToLanding
 }) {
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem('careerhut_sidebar_collapsed') === 'true';
+  });
   const [profileOpen, setProfileOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('careerhut_theme') || 'light');
   const profileContainerRef = useRef(null);
+
+  const toggleCollapsed = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('careerhut_sidebar_collapsed', String(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -119,71 +115,18 @@ export default function DashboardSidebar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [profileOpen]);
 
-  // Every country that has at least one loaded role, resolved from the job
-  // data itself (see src/utils/locations.js) and sorted by role count.
+  // Every country that has at least one loaded role
   const locationItems = [
     { label: 'All Countries', value: '', icon: '🌐', count: null },
     ...countries,
   ];
 
-  const sectionLabelStyle = SECTION_LABEL_STYLE;
-
-  const locationButtonStyle = (isSelected) => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '6px 10px',
-    borderRadius: 'var(--radius-sm)',
-    background: isSelected ? 'var(--primary-light)' : 'transparent',
-    color: isSelected ? 'var(--primary-text)' : 'var(--text-main)',
-    fontWeight: isSelected ? 700 : 500,
-    fontSize: '0.82rem',
-    border: 'none',
-    cursor: 'pointer',
-    textAlign: 'left',
-    transition: 'var(--transition)'
-  });
-
-  const renderLocationButton = (item, showCount) => {
-    const isSelected = selectedLocation === item.value;
-    return (
-      <button
-        key={item.value || item.label}
-        title={showCount && item.count != null ? `${item.count} roles in ${item.label}` : item.label}
-        onClick={() => onSelectLocation(isSelected ? '' : item.value)}
-        style={locationButtonStyle(isSelected)}
-        onMouseEnter={(e) => {
-          if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
-        }}
-        onMouseLeave={(e) => {
-          if (!isSelected) e.currentTarget.style.background = 'transparent';
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-          <span>{item.icon}</span>
-          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {item.label}
-          </span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {showCount && item.count != null && (
-            <span style={{
-              fontSize: '0.7rem',
-              fontWeight: 600,
-              color: isSelected ? 'var(--primary-text)' : 'var(--text-subtle)'
-            }}>
-              {item.count}
-            </span>
-          )}
-          {isSelected && <CheckCircle2 size={13} color="var(--primary)" />}
-        </div>
-      </button>
-    );
-  };
+  const isAllJobsActive = !onlyBookmarked && !hasEmailOnly && !selectedCompany;
 
   return (
     <aside style={{
-      width: '260px',
+      width: isCollapsed ? '68px' : '260px',
+      minWidth: isCollapsed ? '68px' : '260px',
       flexShrink: 0,
       background: 'var(--bg-surface)',
       borderRight: '1px solid var(--border-color)',
@@ -191,116 +134,131 @@ export default function DashboardSidebar({
       flexDirection: 'column',
       height: '100vh',
       overflow: 'hidden',
-      zIndex: 10
+      zIndex: 10,
+      transition: 'width 0.22s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
+      userSelect: 'none'
     }}>
       {/* Brand Header */}
       <div style={{
-        padding: '18px 20px',
+        padding: isCollapsed ? '16px 12px' : '18px 16px 18px 20px',
         borderBottom: '1px solid var(--border-color)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: isCollapsed ? 'center' : 'space-between',
+        height: '69px',
+        boxSizing: 'border-box'
       }}>
-        <div 
-          onClick={onGoToLanding}
-          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: onGoToLanding ? 'pointer' : 'default' }}
-          title={onGoToLanding ? "Back to Landing Page" : undefined}
-        >
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            background: 'linear-gradient(135deg, #780115 0%, #9c0e24 100%)',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: '1rem',
-            boxShadow: '0 2px 6px rgba(120, 1, 21, 0.25)'
-          }}>
-            C
-          </div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-              Careerhut
+        {!isCollapsed ? (
+          <>
+            <div 
+              onClick={onGoToLanding}
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '10px', 
+                cursor: onGoToLanding ? 'pointer' : 'default',
+                minWidth: 0
+              }}
+              title={onGoToLanding ? "Back to Landing Page" : undefined}
+            >
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #780115 0%, #9c0e24 100%)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                fontSize: '1rem',
+                boxShadow: '0 2px 6px rgba(120, 1, 21, 0.25)',
+                flexShrink: 0
+              }}>
+                C
+              </div>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                Careerhut
+              </div>
             </div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-subtle)', fontWeight: 600 }}>
-              Direct Jobs Engine
-            </div>
-          </div>
-        </div>
 
-        <button
-          onClick={onResetFilters}
-          title="Reset all filters"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--text-subtle)',
-            fontSize: '0.72rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            padding: '4px 6px',
-            borderRadius: 'var(--radius-sm)'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
-          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-subtle)'}
-        >
-          Reset
-        </button>
+            <button
+              onClick={toggleCollapsed}
+              title="Collapse sidebar"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
+                transition: 'var(--transition)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--text-main)';
+                e.currentTarget.style.background = 'var(--bg-secondary)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-subtle)';
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <PanelLeftClose size={18} />
+            </button>
+          </>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+            <button
+              onClick={toggleCollapsed}
+              title="Expand sidebar"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-main)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
+                transition: 'var(--transition)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--primary)';
+                e.currentTarget.style.background = 'var(--bg-secondary)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-main)';
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <PanelLeftOpen size={20} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Scrollable Navigation & Filter Content */}
       <div style={{
         flex: 1,
         overflowY: 'auto',
-        padding: '16px 14px',
+        padding: isCollapsed ? '16px 8px' : '16px 14px',
         display: 'flex',
         flexDirection: 'column',
         gap: '20px'
       }}>
         {/* Section 1: Main Views */}
         <div>
-          <div style={{
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            color: 'var(--text-subtle)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            paddingLeft: '8px',
-            marginBottom: '6px'
-          }}>
-            <span>Navigation</span>
-          </div>
+          {!isCollapsed && (
+            <div style={SECTION_LABEL_STYLE}>
+              <span>Navigation</span>
+            </div>
+          )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            {onGoToLanding && (
-              <button
-                onClick={onGoToLanding}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '9px',
-                  padding: '7px 10px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'transparent',
-                  color: 'var(--text-muted)',
-                  fontWeight: 600,
-                  fontSize: '0.82rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'var(--transition)'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <Layers size={14} color="var(--text-subtle)" />
-                <span>Landing Overview</span>
-              </button>
-            )}
-
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {/* All Jobs */}
             <button
               onClick={() => {
@@ -308,46 +266,57 @@ export default function DashboardSidebar({
                 if (hasEmailOnly) onToggleHasEmail(false);
                 if (selectedCompany) onSelectCompany('');
               }}
+              title={isCollapsed ? `All Direct Jobs (${totalJobsCount?.toLocaleString() || '680+'})` : undefined}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 10px',
+                justifyContent: isCollapsed ? 'center' : 'space-between',
+                padding: isCollapsed ? '10px' : '8px 10px',
                 borderRadius: 'var(--radius-sm)',
-                background: (!onlyBookmarked && !hasEmailOnly && !selectedCompany) ? 'var(--primary-light)' : 'transparent',
-                color: (!onlyBookmarked && !hasEmailOnly && !selectedCompany) ? 'var(--primary-text)' : 'var(--text-main)',
-                fontWeight: (!onlyBookmarked && !hasEmailOnly && !selectedCompany) ? 700 : 500,
+                background: isAllJobsActive ? 'var(--primary-light)' : 'transparent',
+                color: isAllJobsActive ? 'var(--primary-text)' : 'var(--text-main)',
+                fontWeight: isAllJobsActive ? 700 : 500,
                 fontSize: '0.84rem',
                 border: 'none',
                 cursor: 'pointer',
                 textAlign: 'left',
-                transition: 'var(--transition)'
+                transition: 'var(--transition)',
+                position: 'relative'
+              }}
+              onMouseEnter={(e) => {
+                if (!isAllJobsActive) e.currentTarget.style.background = 'var(--bg-secondary)';
+              }}
+              onMouseLeave={(e) => {
+                if (!isAllJobsActive) e.currentTarget.style.background = 'transparent';
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                <Compass size={15} color={(!onlyBookmarked && !hasEmailOnly && !selectedCompany) ? 'var(--primary)' : 'var(--text-subtle)'} />
-                <span>All Direct Jobs</span>
+                <Compass size={17} color={isAllJobsActive ? 'var(--primary)' : 'var(--text-subtle)'} />
+                {!isCollapsed && <span>All Direct Jobs</span>}
               </div>
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                background: (!onlyBookmarked && !hasEmailOnly && !selectedCompany) ? 'rgba(120, 1, 21, 0.12)' : 'var(--bg-secondary)',
-                color: (!onlyBookmarked && !hasEmailOnly && !selectedCompany) ? 'var(--primary-text)' : 'var(--text-muted)',
-                padding: '2px 7px',
-                borderRadius: 'var(--radius-full)'
-              }}>
-                {totalJobsCount?.toLocaleString() || '680+'}
-              </span>
+              {!isCollapsed && (
+                <span style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  background: isAllJobsActive ? 'rgba(120, 1, 21, 0.12)' : 'var(--bg-secondary)',
+                  color: isAllJobsActive ? 'var(--primary-text)' : 'var(--text-muted)',
+                  padding: '2px 7px',
+                  borderRadius: 'var(--radius-full)'
+                }}>
+                  {totalJobsCount?.toLocaleString() || '680+'}
+                </span>
+              )}
             </button>
 
             {/* Saved Jobs */}
             <button
               onClick={() => onToggleBookmarked(!onlyBookmarked)}
+              title={isCollapsed ? `Saved Roles (${bookmarkedCount})` : undefined}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 10px',
+                justifyContent: isCollapsed ? 'center' : 'space-between',
+                padding: isCollapsed ? '10px' : '8px 10px',
                 borderRadius: 'var(--radius-sm)',
                 background: onlyBookmarked ? 'var(--primary-light)' : 'transparent',
                 color: onlyBookmarked ? 'var(--primary-text)' : 'var(--text-main)',
@@ -356,35 +325,55 @@ export default function DashboardSidebar({
                 border: 'none',
                 cursor: 'pointer',
                 textAlign: 'left',
-                transition: 'var(--transition)'
+                transition: 'var(--transition)',
+                position: 'relative'
+              }}
+              onMouseEnter={(e) => {
+                if (!onlyBookmarked) e.currentTarget.style.background = 'var(--bg-secondary)';
+              }}
+              onMouseLeave={(e) => {
+                if (!onlyBookmarked) e.currentTarget.style.background = 'transparent';
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                <Bookmark size={15} color={onlyBookmarked ? 'var(--primary)' : 'var(--text-subtle)'} />
-                <span>Saved Roles</span>
+                <Bookmark size={17} color={onlyBookmarked ? 'var(--primary)' : 'var(--text-subtle)'} />
+                {!isCollapsed && <span>Saved Roles</span>}
               </div>
               {bookmarkedCount > 0 && (
-                <span style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  background: 'var(--primary)',
-                  color: '#ffffff',
-                  padding: '2px 7px',
-                  borderRadius: 'var(--radius-full)'
-                }}>
-                  {bookmarkedCount}
-                </span>
+                !isCollapsed ? (
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    background: 'var(--primary)',
+                    color: '#ffffff',
+                    padding: '2px 7px',
+                    borderRadius: 'var(--radius-full)'
+                  }}>
+                    {bookmarkedCount}
+                  </span>
+                ) : (
+                  <span style={{
+                    position: 'absolute',
+                    top: '6px',
+                    right: '8px',
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    background: 'var(--primary)'
+                  }} />
+                )
               )}
             </button>
 
             {/* Direct Recruiter Contacts */}
             <button
               onClick={() => onToggleHasEmail(!hasEmailOnly)}
+              title={isCollapsed ? "Recruiter Contacts (Verified Direct Emails)" : undefined}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 10px',
+                justifyContent: isCollapsed ? 'center' : 'space-between',
+                padding: isCollapsed ? '10px' : '8px 10px',
                 borderRadius: 'var(--radius-sm)',
                 background: hasEmailOnly ? 'var(--primary-light)' : 'transparent',
                 color: hasEmailOnly ? 'var(--primary-text)' : 'var(--text-main)',
@@ -393,58 +382,111 @@ export default function DashboardSidebar({
                 border: 'none',
                 cursor: 'pointer',
                 textAlign: 'left',
-                transition: 'var(--transition)'
+                transition: 'var(--transition)',
+                position: 'relative'
+              }}
+              onMouseEnter={(e) => {
+                if (!hasEmailOnly) e.currentTarget.style.background = 'var(--bg-secondary)';
+              }}
+              onMouseLeave={(e) => {
+                if (!hasEmailOnly) e.currentTarget.style.background = 'transparent';
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                <Mail size={15} color={hasEmailOnly ? 'var(--primary)' : 'var(--text-subtle)'} />
-                <span>Recruiter Contacts</span>
+                <Mail size={17} color={hasEmailOnly ? 'var(--primary)' : 'var(--text-subtle)'} />
+                {!isCollapsed && <span>Recruiter Contacts</span>}
               </div>
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: 600,
-                color: 'var(--primary)',
-                background: 'var(--primary-light)',
-                padding: '2px 6px',
-                borderRadius: '4px'
-              }}>
-                Verified
-              </span>
+              {!isCollapsed ? (
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  color: 'var(--primary)',
+                  background: 'var(--primary-light)',
+                  padding: '2px 6px',
+                  borderRadius: '4px'
+                }}>
+                  Verified
+                </span>
+              ) : (
+                hasEmailOnly && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '6px',
+                    right: '8px',
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    background: 'var(--primary)'
+                  }} />
+                )
+              )}
             </button>
           </div>
         </div>
 
         {/* Section 2: Direct Company Portals */}
         <div>
-          <div style={{
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            color: 'var(--text-subtle)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            paddingLeft: '8px',
-            marginBottom: '6px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <span>Company Portals</span>
-            <span style={{ fontSize: '0.68rem', color: 'var(--text-subtle)' }}>({companies.length})</span>
-          </div>
+          {!isCollapsed ? (
+            <div style={{
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              color: 'var(--text-subtle)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              paddingLeft: '8px',
+              marginBottom: '6px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span>Company Portals</span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-subtle)' }}>({companies.length})</span>
+            </div>
+          ) : (
+            <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0 8px' }} />
+          )}
 
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '2px',
-            // Every company is rendered; this box scrolls so the sections
-            // below (Workplace, Locations) stay reachable in the sidebar.
-            maxHeight: '320px',
+            gap: isCollapsed ? '6px' : '2px',
+            maxHeight: isCollapsed ? '280px' : '320px',
             overflowY: 'auto',
-            paddingRight: '2px'
+            paddingRight: '2px',
+            alignItems: isCollapsed ? 'center' : 'stretch'
           }}>
             {companies.map((c) => {
               const isSelected = selectedCompany === c.company;
               const logoUrl = companyLogos[c.company] || c.company_logo || null;
+
+              if (isCollapsed) {
+                return (
+                  <button
+                    key={c.company}
+                    onClick={() => onSelectCompany(isSelected ? '' : c.company)}
+                    title={`${c.company} (${c.job_count} roles)`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '6px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: isSelected ? 'var(--primary-light)' : 'transparent',
+                      border: isSelected ? '1px solid var(--primary)' : '1px solid transparent',
+                      cursor: 'pointer',
+                      transition: 'var(--transition)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) e.currentTarget.style.background = 'transparent';
+                    }}
+                  >
+                    <CompanyLogo src={logoUrl} name={c.company} size={24} radius={6} />
+                  </button>
+                );
+              }
 
               return (
                 <button
@@ -491,29 +533,163 @@ export default function DashboardSidebar({
           </div>
         </div>
 
-
-        {/* Section 4: Locations -- every country with roles, from the data */}
+        {/* Section 3: Locations */}
         <div>
-          <div style={sectionLabelStyle}>
-            Countries
-          </div>
+          {!isCollapsed ? (
+            <div style={SECTION_LABEL_STYLE}>
+              Countries
+            </div>
+          ) : (
+            <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0 8px' }} />
+          )}
 
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '2px',
-            maxHeight: '320px',
+            gap: isCollapsed ? '6px' : '2px',
+            maxHeight: isCollapsed ? '240px' : '320px',
             overflowY: 'auto',
-            paddingRight: '2px'
+            paddingRight: '2px',
+            alignItems: isCollapsed ? 'center' : 'stretch'
           }}>
-            {locationItems.map((item) => renderLocationButton(item, true))}
+            {locationItems.map((item) => {
+              const isSelected = selectedLocation === item.value;
+
+              if (isCollapsed) {
+                return (
+                  <button
+                    key={item.value || item.label}
+                    title={item.count != null ? `${item.label} (${item.count})` : item.label}
+                    onClick={() => onSelectLocation(isSelected ? '' : item.value)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '36px',
+                      height: '32px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: isSelected ? 'var(--primary-light)' : 'transparent',
+                      border: isSelected ? '1px solid var(--primary)' : '1px solid transparent',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      transition: 'var(--transition)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) e.currentTarget.style.background = 'transparent';
+                    }}
+                  >
+                    <span>{item.icon}</span>
+                  </button>
+                );
+              }
+
+              return (
+                <button
+                  key={item.value || item.label}
+                  title={item.count != null ? `${item.count} roles in ${item.label}` : item.label}
+                  onClick={() => onSelectLocation(isSelected ? '' : item.value)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '6px 10px',
+                    borderRadius: 'var(--radius-sm)',
+                    background: isSelected ? 'var(--primary-light)' : 'transparent',
+                    color: isSelected ? 'var(--primary-text)' : 'var(--text-main)',
+                    fontWeight: isSelected ? 700 : 500,
+                    fontSize: '0.82rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'var(--transition)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                    <span>{item.icon}</span>
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {item.label}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {item.count != null && (
+                      <span style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        color: isSelected ? 'var(--primary-text)' : 'var(--text-subtle)'
+                      }}>
+                        {item.count}
+                      </span>
+                    )}
+                    {isSelected && <CheckCircle2 size={13} color="var(--primary)" />}
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
-          {regions.length > 0 && (
+          {!isCollapsed && regions.length > 0 && (
             <div style={{ marginTop: '14px' }}>
-              <div style={sectionLabelStyle}>Regions</div>
+              <div style={SECTION_LABEL_STYLE}>Regions</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                {regions.map((item) => renderLocationButton(item, true))}
+                {regions.map((item) => {
+                  const isSelected = selectedLocation === item.value;
+                  return (
+                    <button
+                      key={item.value || item.label}
+                      title={item.count != null ? `${item.count} roles in ${item.label}` : item.label}
+                      onClick={() => onSelectLocation(isSelected ? '' : item.value)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '6px 10px',
+                        borderRadius: 'var(--radius-sm)',
+                        background: isSelected ? 'var(--primary-light)' : 'transparent',
+                        color: isSelected ? 'var(--primary-text)' : 'var(--text-main)',
+                        fontWeight: isSelected ? 700 : 500,
+                        fontSize: '0.82rem',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'var(--transition)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) e.currentTarget.style.background = 'transparent';
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                        <span>{item.icon}</span>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.label}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {item.count != null && (
+                          <span style={{
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            color: isSelected ? 'var(--primary-text)' : 'var(--text-subtle)'
+                          }}>
+                            {item.count}
+                          </span>
+                        )}
+                        {isSelected && <CheckCircle2 size={13} color="var(--primary)" />}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -529,9 +705,10 @@ export default function DashboardSidebar({
         {profileOpen && (
           <div style={{
             position: 'absolute',
-            bottom: 'calc(100% + 8px)',
-            left: '10px',
-            right: '10px',
+            bottom: isCollapsed ? '12px' : 'calc(100% + 8px)',
+            left: isCollapsed ? '76px' : '10px',
+            right: isCollapsed ? 'auto' : '10px',
+            width: isCollapsed ? '250px' : 'auto',
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-md)',
@@ -732,13 +909,14 @@ export default function DashboardSidebar({
         {/* Profile Card Trigger Button */}
         <div 
           onClick={() => setProfileOpen(!profileOpen)}
+          title={isCollapsed ? "Joel Morgan (Profile & Settings)" : undefined}
           style={{
-            padding: '12px 14px',
+            padding: isCollapsed ? '12px 10px' : '12px 14px',
             borderTop: '1px solid var(--border-color)',
             background: profileOpen ? 'var(--bg-tag)' : 'var(--bg-secondary)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: isCollapsed ? 'center' : 'space-between',
             cursor: 'pointer',
             transition: 'var(--transition)',
             userSelect: 'none'
@@ -781,41 +959,45 @@ export default function DashboardSidebar({
             </div>
 
             {/* User Meta */}
-            <div style={{ minWidth: 0 }}>
-              <div style={{
-                fontWeight: 700,
-                fontSize: '0.84rem',
-                color: 'var(--text-main)',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}>
-                Joel Morgan
+            {!isCollapsed && (
+              <div style={{ minWidth: 0 }}>
+                <div style={{
+                  fontWeight: 700,
+                  fontSize: '0.84rem',
+                  color: 'var(--text-main)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  Joel Morgan
+                </div>
+                <div style={{
+                  fontSize: '0.7rem',
+                  color: 'var(--text-subtle)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  Senior Candidate • Pro
+                </div>
               </div>
-              <div style={{
-                fontSize: '0.7rem',
-                color: 'var(--text-subtle)',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}>
-                Senior Candidate • Pro
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Arrow / Chevron Toggle indicator */}
-          <div style={{
-            color: profileOpen ? 'var(--primary)' : 'var(--text-subtle)',
-            padding: '4px',
-            borderRadius: 'var(--radius-sm)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'var(--transition)'
-          }}>
-            {profileOpen ? <ChevronDown size={17} /> : <ChevronUp size={17} />}
-          </div>
+          {!isCollapsed && (
+            <div style={{
+              color: profileOpen ? 'var(--primary)' : 'var(--text-subtle)',
+              padding: '4px',
+              borderRadius: 'var(--radius-sm)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'var(--transition)'
+            }}>
+              {profileOpen ? <ChevronDown size={17} /> : <ChevronUp size={17} />}
+            </div>
+          )}
         </div>
       </div>
     </aside>
