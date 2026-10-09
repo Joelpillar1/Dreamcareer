@@ -279,43 +279,27 @@ export default function LandingPage({
       }}>
         {/* A. HERO TEXTS (Clean on canvas - No outer frame) */}
         <div style={{ maxWidth: '960px', margin: '0 auto 40px' }}>
-          {/* Top Announcement Pill */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '5px 14px',
-            borderRadius: '999px',
-            backgroundColor: '#ffffff',
-            border: '1px dashed #cbd5e1',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
-            marginBottom: '20px'
-          }}>
-            <span style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              boxShadow: '0 0 6px #10b981'
-            }} />
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>
+          {/* Top Announcement Pill (Compact & minimal) */}
+          <div className="hero-pill-badge">
+            <span className="hero-pill-dot" />
+            <span className="hero-pill-title">
               Direct career discovery
             </span>
-            <span style={{ color: '#cbd5e1' }}>•</span>
-            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+            <span className="hero-pill-separator">•</span>
+            <span className="hero-pill-subtitle">
               100% verified roles
             </span>
-            <ArrowRight size={12} color="#780115" />
+            <ArrowRight size={11} color="#780115" />
           </div>
 
           {/* Hero Main Headline */}
           <h1 style={{
-            fontSize: 'clamp(2.5rem, 5.8vw, 4.4rem)',
+            fontSize: 'clamp(2.2rem, 5.5vw, 4.2rem)',
             fontWeight: 800,
-            lineHeight: 1.1,
+            lineHeight: 1.12,
             letterSpacing: '-0.04em',
             color: '#0f172a',
-            margin: '0 auto 18px'
+            margin: '0 auto 16px'
           }}>
             Skip the job boards.{' '}
             <span style={{
@@ -327,11 +311,11 @@ export default function LandingPage({
             </span>
           </h1>
 
-          {/* Hero Subtitle (Crisp 2-line layout for both Desktop and Mobile) */}
+          {/* Hero Subtitle (Guaranteed 2-line layout on Desktop & Mobile) */}
           <p className="hero-subtext">
-            Search live roles indexed directly from official company career pages,
+            <span className="hero-subtext-line">Search live roles directly from official career pages,</span>
             <br className="hero-subtext-break" />
-            with verified recruiter emails and direct hiring contacts.
+            <span className="hero-subtext-line">with verified recruiter emails & direct hiring contacts.</span>
           </p>
 
           {/* Hero CTA Buttons (Side by side on all screen sizes) */}

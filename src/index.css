@@ -1020,14 +1020,60 @@ body {
   }
 }
 
+/* ==================== HERO PILL BADGE ==================== */
+.hero-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3.5px 12px;
+  border-radius: 999px;
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  margin-bottom: 16px;
+  max-width: 90vw;
+}
+
+.hero-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 5px #10b981;
+  flex-shrink: 0;
+}
+
+.hero-pill-title {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.hero-pill-separator {
+  color: #cbd5e1;
+  font-size: 0.72rem;
+}
+
+.hero-pill-subtitle {
+  font-size: 0.76rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
 /* ==================== HERO SUBTEXT & SIDE-BY-SIDE BUTTONS ==================== */
 .hero-subtext {
-  font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+  font-size: clamp(0.92rem, 1.8vw, 1.08rem);
   color: #475569;
-  max-width: 620px;
+  max-width: 640px;
   margin: 0 auto 26px;
   line-height: 1.5;
   letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.hero-subtext-line {
+  display: inline;
 }
 
 .hero-subtext-break {
@@ -1043,17 +1089,17 @@ body {
   flex-wrap: nowrap !important;
   margin: 0 auto 30px !important;
   width: 100%;
-  max-width: 460px;
+  max-width: 440px;
 }
 
 .hero-btn-primary {
-  padding: 11px 22px;
+  padding: 10px 20px;
   border-radius: 8px;
   background-color: #780115;
   color: #ffffff;
   border: 1px solid #780115;
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1070,13 +1116,13 @@ body {
 }
 
 .hero-btn-secondary {
-  padding: 11px 20px;
+  padding: 10px 18px;
   border-radius: 8px;
   background-color: #ffffff;
   color: #0f172a;
   border: 1px solid #cbd5e1;
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1092,29 +1138,48 @@ body {
 }
 
 @media (max-width: 640px) {
+  .hero-pill-badge {
+    padding: 3px 9px;
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+  .hero-pill-dot {
+    width: 5px;
+    height: 5px;
+  }
+  .hero-pill-title,
+  .hero-pill-subtitle {
+    font-size: 0.7rem;
+  }
+  .hero-subtext {
+    font-size: clamp(0.72rem, 3.4vw, 0.82rem);
+    max-width: 100%;
+    margin: 0 auto 20px;
+    line-height: 1.4;
+    padding: 0 4px;
+  }
+  .hero-subtext-line {
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .hero-subtext-break {
+    display: block;
+  }
   .hero-cta-group {
     gap: 8px !important;
     max-width: 100%;
-    padding: 0 8px;
+    padding: 0 6px;
   }
   .hero-btn-primary,
   .hero-btn-secondary {
     flex: 1 1 0;
     min-width: 0;
-    padding: 10px 8px !important;
-    font-size: 0.82rem !important;
-    gap: 5px !important;
-  }
-  .hero-subtext {
-    font-size: 0.88rem;
-    max-width: 330px;
-    margin-bottom: 22px;
-    line-height: 1.45;
-  }
-  .hero-subtext-break {
-    display: block;
+    padding: 9px 6px !important;
+    font-size: 0.78rem !important;
+    gap: 4px !important;
   }
 }
+
 
 
 
