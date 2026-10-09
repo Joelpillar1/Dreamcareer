@@ -123,30 +123,59 @@ _STATS_KEY = "stats"
 _COMPANIES_KEY = "companies"
 _cache_lock = threading.Lock()
 _cache_entries: Dict[str, Tuple[float, Any]] = {}
-_cache_key_locks: Dict[str, threading.Lock] = {}
+_cache_builds: Dict[str, bool] = {}
+
+
+def _start_build(key: str, builder) -> bool:
+    """Kick off one background rebuild for a key (False if one is running)."""
+    with _cache_lock:
+        if _cache_builds.get(key):
+            return False
+        _cache_builds[key] = True
+
+    def _run():
+        try:
+            value = builder()
+            with _cache_lock:
+                _cache_entries[key] = (time.time(), value)
+        except Exception:
+            pass  # the next tick retries; meanwhile the stale copy still serves
+        finally:
+            with _cache_lock:
+                _cache_builds[key] = False
+
+    threading.Thread(target=_run, daemon=True, name=f"warm-{key}").start()
+    return True
 
 
 def _cached(key: str, builder):
-    """Serve a cached value, rebuilding at most once per key at a time.
+    """Serve a snapshot without ever making a request wait for a rebuild.
 
-    Concurrent page requests for the same key wait on the key lock rather
-    than each repeating the expensive build (thundering herd).
+    Fresh entry -> returned as-is.  Expired -> the stale copy is returned too
+    while a single background rebuild runs (stale beats a stalled request, and
+    a stalled request is what dropped the dashboard onto its 709-row fallback).
+    Only a genuinely cold cache waits, and the warmer thread fills that in at
+    startup so the first page load never pays the ~10-30s build.
     """
     with _cache_lock:
         entry = _cache_entries.get(key)
-        if entry and time.time() - entry[0] < _CACHE_TTL:
-            return entry[1]
-        lock = _cache_key_locks.get(key)
-        if lock is None:
-            lock = threading.Lock()
-            _cache_key_locks[key] = lock
-    with lock:
-        entry = _cache_entries.get(key)
-        if entry and time.time() - entry[0] < _CACHE_TTL:
-            return entry[1]
-        value = builder()
-        _cache_entries[key] = (time.time(), value)
-        return value
+
+    if entry is None:
+        deadline = time.time() + 90.0
+        while time.time() < deadline:
+            _start_build(key, builder)     # no-op while a build is in flight
+            time.sleep(0.25)
+            with _cache_lock:
+                entry = _cache_entries.get(key)
+            if entry is not None:
+                return entry[1]
+        raise RuntimeError("cache build timed out")
+
+    if time.time() - entry[0] < _CACHE_TTL:
+        return entry[1]
+
+    _start_build(key, builder)             # refresh behind the scenes
+    return entry[1]                        # stale now, fresh next time
 
 
 def _build_all_jobs() -> List[Dict[str, Any]]:
@@ -171,6 +200,8 @@ def _cache_refresher():
     # Daemon loop: warm the snapshot before the first page load, then keep
     # it in step with the database. Rebuilding only on a row-count change
     # (plus a staleness cap for in-place updates) keeps this cheap at idle.
+    _start_build(_JOBS_KEY, _build_all_jobs)   # warm before the first request
+    _start_build(_STATS_KEY, storage.get_stats)
     while True:
         time.sleep(5)
         try:
@@ -183,10 +214,10 @@ def _cache_refresher():
             stats_age = (now - stats_entry[0]) if stats_entry else 1e9
             count = _row_count()
             if rows is None or job_age > 180.0 or (count >= 0 and len(rows) != count):
-                _cached(_JOBS_KEY, _build_all_jobs)
+                _start_build(_JOBS_KEY, _build_all_jobs)
                 stats_age = 1e9  # totals moved together with the rows
             if stats_age > _CACHE_TTL:
-                _cached(_STATS_KEY, storage.get_stats)
+                _start_build(_STATS_KEY, storage.get_stats)
         except Exception:
             continue  # never let one bad read kill the warmer
 

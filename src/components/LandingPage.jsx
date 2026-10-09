@@ -327,54 +327,21 @@ export default function LandingPage({
             </span>
           </h1>
 
-          {/* Hero Subtitle */}
-          <p style={{
-            fontSize: 'clamp(1.05rem, 2vw, 1.25rem)',
-            color: '#475569',
-            maxWidth: '740px',
-            margin: '0 auto 30px',
-            lineHeight: 1.55
-          }}>
-            Search live roles indexed straight from official company career pages, complete with verified recruiter emails and direct hiring team contacts.
+          {/* Hero Subtitle (Crisp 2-line layout for both Desktop and Mobile) */}
+          <p className="hero-subtext">
+            Search live roles indexed directly from official company career pages,
+            <br className="hero-subtext-break" />
+            with verified recruiter emails and direct hiring contacts.
           </p>
 
-          {/* Hero CTA Buttons */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '12px',
-            flexWrap: 'wrap',
-            marginBottom: '20px'
-          }}>
+          {/* Hero CTA Buttons (Side by side on all screen sizes) */}
+          <div className="hero-cta-group">
             <button
               onClick={() => onExploreJobs()}
-              style={{
-                padding: '12px 26px',
-                borderRadius: '8px',
-                backgroundColor: '#780115',
-                color: '#ffffff',
-                border: 'none',
-                fontWeight: 700,
-                fontSize: '0.96rem',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 14px rgba(120, 1, 21, 0.28)',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#5c0010';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#780115';
-                e.currentTarget.style.transform = 'none';
-              }}
+              className="hero-btn-primary"
             >
-              <span>Start searching {totalJobsCount ? `(${totalJobsCount.toLocaleString()} roles)` : ''}</span>
-              <ArrowRight size={16} />
+              <span>Start Searching</span>
+              <ArrowRight size={15} />
             </button>
 
             <button
@@ -382,31 +349,10 @@ export default function LandingPage({
                 const el = document.getElementById('hero-preview-frame');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
-              style={{
-                padding: '12px 22px',
-                borderRadius: '8px',
-                backgroundColor: '#ffffff',
-                color: '#0f172a',
-                border: '1px solid #cbd5e1',
-                fontWeight: 700,
-                fontSize: '0.96rem',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8fafc';
-                e.currentTarget.style.borderColor = '#94a3b8';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.borderColor = '#cbd5e1';
-              }}
+              className="hero-btn-secondary"
             >
-              <Globe size={16} color="#780115" />
-              <span>Direct portal discovery</span>
+              <Globe size={15} color="#780115" />
+              <span>Direct Portals</span>
             </button>
           </div>
         </div>

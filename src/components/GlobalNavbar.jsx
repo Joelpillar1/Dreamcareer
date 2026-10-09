@@ -44,27 +44,8 @@ export default function GlobalNavbar({
   };
 
   return (
-    <header style={{
-      position: 'sticky',
-      top: 0,
-      zIndex: 1000,
-      backgroundColor: 'rgba(255, 255, 255, 0.94)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      borderBottom: '1px solid #e2e8f0',
-      boxShadow: '0 2px 12px rgba(15, 23, 42, 0.05)',
-      width: '100%',
-      transition: 'all 0.2s ease'
-    }}>
-      <div style={{
-        maxWidth: '1280px',
-        margin: '0 auto',
-        padding: '0 24px',
-        height: '60px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
+    <header className="global-nav-header">
+      <div className="global-nav-inner">
         {/* Logo */}
         <div 
           onClick={handleBrandClick}
@@ -73,13 +54,7 @@ export default function GlobalNavbar({
           <img 
             src="/Careerhut.png" 
             alt="Careerhut" 
-            style={{
-              height: '34px',
-              width: 'auto',
-              maxWidth: '180px',
-              objectFit: 'contain',
-              display: 'block'
-            }}
+            className="global-nav-logo-img"
           />
         </div>
 
@@ -197,29 +172,7 @@ export default function GlobalNavbar({
 
           <button
             onClick={() => onExploreJobs && onExploreJobs()}
-            style={{
-              padding: '7px 16px',
-              fontSize: '0.84rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              backgroundColor: '#780115',
-              border: '1px solid #780115',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(120, 1, 21, 0.22)',
-              transition: 'all 0.15s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#5c0010';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#780115';
-              e.currentTarget.style.transform = 'none';
-            }}
+            className="global-nav-dashboard-btn"
           >
             <span>Dashboard</span>
             <ArrowRight size={14} />
@@ -251,7 +204,7 @@ export default function GlobalNavbar({
                 <img 
                   src="/Careerhut.png" 
                   alt="Careerhut" 
-                  style={{ height: '28px', width: 'auto', maxWidth: '150px', objectFit: 'contain', display: 'block' }} 
+                  style={{ height: '20px', width: 'auto', maxWidth: '120px', objectFit: 'contain', display: 'block' }} 
                 />
               </div>
               <button 

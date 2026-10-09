@@ -912,5 +912,209 @@ body {
   }
 }
 
+/* ==================== GLOBAL NAVBAR & HERO RESPONSIVE STYLING ==================== */
+.global-nav-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.global-nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.global-nav-logo-img {
+  height: 24px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  display: block;
+}
+
+.global-nav-dashboard-btn {
+  padding: 7px 16px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #780115;
+  border: 1px solid #780115;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(120, 1, 21, 0.22);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.global-nav-dashboard-btn:hover {
+  background-color: #5c0010;
+  transform: translateY(-1px);
+}
+
+.landing-nav-mobile-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 7px 9px;
+  color: #334155;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1100;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.landing-mobile-menu-drawer {
+  width: 280px;
+  max-width: 85vw;
+  background-color: #ffffff;
+  height: 100%;
+  padding: 20px 16px;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .landing-nav-desktop {
+    display: none !important;
+  }
+  .landing-nav-mobile-btn {
+    display: inline-flex !important;
+  }
+  .global-nav-inner {
+    padding: 0 16px;
+    height: 52px;
+  }
+  .global-nav-logo-img {
+    height: 20px;
+    max-width: 105px;
+  }
+  .global-nav-dashboard-btn {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    gap: 4px;
+  }
+}
+
+/* ==================== HERO SUBTEXT & SIDE-BY-SIDE BUTTONS ==================== */
+.hero-subtext {
+  font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+  color: #475569;
+  max-width: 620px;
+  margin: 0 auto 26px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.hero-subtext-break {
+  display: block;
+}
+
+.hero-cta-group {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  flex-wrap: nowrap !important;
+  margin: 0 auto 30px !important;
+  width: 100%;
+  max-width: 460px;
+}
+
+.hero-btn-primary {
+  padding: 11px 22px;
+  border-radius: 8px;
+  background-color: #780115;
+  color: #ffffff;
+  border: 1px solid #780115;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: 0 4px 14px rgba(120, 1, 21, 0.28);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.hero-btn-primary:hover {
+  background-color: #5c0010;
+  transform: translateY(-1px);
+}
+
+.hero-btn-secondary {
+  padding: 11px 20px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.hero-btn-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+  .hero-cta-group {
+    gap: 8px !important;
+    max-width: 100%;
+    padding: 0 8px;
+  }
+  .hero-btn-primary,
+  .hero-btn-secondary {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 8px !important;
+    font-size: 0.82rem !important;
+    gap: 5px !important;
+  }
+  .hero-subtext {
+    font-size: 0.88rem;
+    max-width: 330px;
+    margin-bottom: 22px;
+    line-height: 1.45;
+  }
+  .hero-subtext-break {
+    display: block;
+  }
+}
+
 
 
