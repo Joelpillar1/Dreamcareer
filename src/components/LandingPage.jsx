@@ -752,13 +752,13 @@ export default function LandingPage({
             color: '#0f172a',
             margin: '0 auto 18px'
           }}>
-            The ultimate hub for{' '}
+            Skip the job boards.{' '}
             <span style={{
               background: 'linear-gradient(135deg, #780115 0%, #b45309 60%, #F7B638 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent'
             }}>
-              high-growth tech careers.
+              Apply directly to the source.
             </span>
           </h1>
 
@@ -770,7 +770,7 @@ export default function LandingPage({
             margin: '0 auto 30px',
             lineHeight: 1.55
           }}>
-            Discover open direct jobs, live company career portals, and verified recruiter contacts from across the ecosystem.
+            Search 10,000+ live tech roles indexed straight from official company career pages — complete with verified recruiter emails and direct hiring team contacts.
           </p>
 
           {/* Hero CTA Buttons */}

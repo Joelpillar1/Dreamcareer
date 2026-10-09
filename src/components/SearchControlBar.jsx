@@ -59,7 +59,10 @@ export default function SearchControlBar({
         padding: '14px 18px',
         marginBottom: '20px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-        position: 'relative'
+        position: 'relative',
+        flexShrink: 0,
+        width: '100%',
+        boxSizing: 'border-box'
       }}
     >
       <CornerPlusMarkers color="#94a3b8" bg="#ffffff" size="13px" />

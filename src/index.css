@@ -351,11 +351,11 @@ body {
 
 /* Responsive Search Control Bar */
 .search-control-container {
+  flex-shrink: 0;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 @media (max-width: 640px) {
@@ -421,9 +421,6 @@ body {
   display: flex;
   flex-direction: column;
   padding: 20px 28px 40px;
-  gap: 16px;
-  -webkit-overflow-scrolling: touch;
-}
   gap: 16px;
   -webkit-overflow-scrolling: touch;
 }

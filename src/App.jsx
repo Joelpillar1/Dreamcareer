@@ -660,39 +660,19 @@ export default function App() {
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border-color)',
                 borderRadius: 'var(--radius-sm)',
-                padding: '6px 8px',
+                padding: '6px 10px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: '6px',
                 cursor: 'pointer',
-                color: 'var(--text-main)'
+                color: 'var(--text-main)',
+                fontSize: '0.82rem',
+                fontWeight: 600
               }}
             >
-              <Menu size={18} />
+              <Menu size={17} />
+              <span>Filters & Menu</span>
             </button>
-            <div 
-              onClick={handleGoToLanding} 
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-              title="Careerhut Home"
-            >
-              <div style={{
-                width: '26px',
-                height: '26px',
-                borderRadius: '6px',
-                background: 'linear-gradient(135deg, #780115 0%, #9c0e24 100%)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                fontSize: '0.85rem'
-              }}>
-                C
-              </div>
-              <span style={{ fontWeight: 800, fontSize: '0.96rem', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
-                Careerhut
-              </span>
-            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
