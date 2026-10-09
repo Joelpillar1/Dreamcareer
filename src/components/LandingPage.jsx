@@ -27,7 +27,9 @@ import {
   HelpCircle,
   Github,
   Twitter,
-  Linkedin
+  Linkedin,
+  Menu,
+  X
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -260,6 +262,7 @@ export default function LandingPage({
   const [activeTab, setActiveTab] = useState('sync');
   const [openFaq, setOpenFaq] = useState(null);
   const [navDropdown, setNavDropdown] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleHeroSubmit = (e) => {
     e.preventDefault();
@@ -343,8 +346,8 @@ export default function LandingPage({
             </div>
           </div>
 
-          {/* Center Navigation Links with Dropdowns */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {/* Center Navigation Links with Dropdowns (Desktop Only) */}
+          <nav className="landing-nav-desktop" style={{ gap: '6px' }}>
             {/* Platform Dropdown */}
             <div 
               style={{ position: 'relative' }}
@@ -540,6 +543,7 @@ export default function LandingPage({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               onClick={() => onExploreJobs()}
+              className="landing-nav-desktop"
               style={{
                 padding: '7px 14px',
                 fontSize: '0.84rem',
@@ -550,7 +554,6 @@ export default function LandingPage({
                 borderRadius: '8px',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
-                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px'
               }}
@@ -602,11 +605,103 @@ export default function LandingPage({
                 e.currentTarget.style.transform = 'none';
               }}
             >
-              <span>Launch dashboard</span>
+              <span>Dashboard</span>
               <ArrowRight size={14} />
+            </button>
+
+            {/* Mobile Hamburger Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="landing-nav-mobile-btn"
+              aria-label="Open mobile navigation"
+            >
+              <Menu size={18} />
             </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div 
+            className="landing-mobile-menu-backdrop"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div 
+              className="landing-mobile-menu-drawer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'linear-gradient(135deg, #780115 0%, #a30e2a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                    <Flame size={16} />
+                  </div>
+                  <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0f172a' }}>Careerhut</span>
+                </div>
+                <button 
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '10px' }}>
+                <button
+                  onClick={() => { setMobileMenuOpen(false); onExploreJobs(); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: '#fff1f2', color: '#780115', border: '1px solid #fecdd3', borderRadius: '8px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', textAlign: 'left' }}
+                >
+                  <Briefcase size={16} />
+                  <span>Explore Direct Jobs ({totalJobsCount?.toLocaleString() || '10,000+'})</span>
+                </button>
+
+                <button
+                  onClick={() => { setMobileMenuOpen(false); onExploreJobs('remote'); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', color: '#334155', border: '1px solid #e2e8f0', borderRadius: '8px', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', textAlign: 'left' }}
+                >
+                  <Globe size={16} />
+                  <span>Remote Opportunities</span>
+                </button>
+
+                <a
+                  href="#features-section"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: '#334155', textDecoration: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '0.88rem' }}
+                >
+                  <Zap size={16} color="#780115" />
+                  <span>Platform Features</span>
+                </a>
+
+                <a
+                  href="#testimonials-section"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: '#334155', textDecoration: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '0.88rem' }}
+                >
+                  <CheckCircle2 size={16} color="#059669" />
+                  <span>Testimonials & Reviews</span>
+                </a>
+
+                <a
+                  href="#faq-section"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: '#334155', textDecoration: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '0.88rem' }}
+                >
+                  <HelpCircle size={16} color="#64748b" />
+                  <span>Frequently Asked Questions</span>
+                </a>
+              </div>
+
+              <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
+                <button
+                  onClick={() => { setMobileMenuOpen(false); onExploreJobs(); }}
+                  style={{ width: '100%', padding: '10px', background: '#780115', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <span>Launch Live App</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ==================== 2. HERO SECTION ==================== */}
@@ -829,19 +924,10 @@ export default function LandingPage({
           {/* Hero Project Preview Mockup Inside Frame */}
           <div 
             onClick={() => onExploreJobs()}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '220px 320px 1fr',
-              height: '460px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              overflow: 'hidden',
-              cursor: 'pointer',
-              position: 'relative'
-            }}
+            className="hero-mockup-frame"
           >
             {/* Column 1: Sidebar Mockup */}
-            <div style={{
+            <div className="hero-mockup-col1" style={{
               backgroundColor: '#f8fafc',
               borderRight: '1px solid #e2e8f0',
               padding: '14px',
@@ -886,7 +972,7 @@ export default function LandingPage({
             </div>
 
             {/* Column 2: Job List Feed Mockup */}
-            <div style={{
+            <div className="hero-mockup-col2" style={{
               borderRight: '1px solid #e2e8f0',
               padding: '12px',
               display: 'flex',
@@ -965,7 +1051,7 @@ export default function LandingPage({
             </div>
 
             {/* Column 3: Detailed Job View Mockup */}
-            <div style={{
+            <div className="hero-mockup-col3" style={{
               padding: '20px',
               backgroundColor: '#ffffff',
               display: 'flex',
@@ -1265,12 +1351,7 @@ export default function LandingPage({
         }}>
           <CornerPlusMarkers color="#94a3b8" bg="#ffffff" />
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1.1fr',
-            gap: '36px',
-            alignItems: 'center'
-          }}>
+          <div className="landing-split-2col">
             {/* Left Description Column */}
             <div>
               <div style={{

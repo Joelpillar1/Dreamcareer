@@ -50,35 +50,41 @@ export default function SearchControlBar({
   ];
 
   return (
-    <div style={{
-      background: 'var(--bg-surface)',
-      border: '1px dashed #cbd5e1',
-      borderRadius: 0,
-      padding: '14px 18px',
-      marginBottom: '20px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-      position: 'relative'
-    }}>
+    <div 
+      className="search-control-container"
+      style={{
+        background: 'var(--bg-surface)',
+        border: '1px dashed #cbd5e1',
+        borderRadius: 0,
+        padding: '14px 18px',
+        marginBottom: '20px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+        position: 'relative'
+      }}
+    >
       <CornerPlusMarkers color="#94a3b8" bg="#ffffff" size="13px" />
       {/* Sleek Command-style Main Search Row */}
-      <div style={{
+      <div className="search-control-row" style={{
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
         flexWrap: 'wrap'
       }}>
         {/* Main Search Input */}
-        <div style={{
-          flex: '1 1 320px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          background: 'var(--bg-input)',
-          border: '1px dashed #cbd5e1',
-          borderRadius: 0,
-          padding: '8px 14px',
-          transition: 'border-color 0.15s ease'
-        }}>
+        <div 
+          className="search-main-input-wrap"
+          style={{
+            flex: '1 1 280px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: 'var(--bg-input)',
+            border: '1px dashed #cbd5e1',
+            borderRadius: 0,
+            padding: '8px 14px',
+            transition: 'border-color 0.15s ease'
+          }}
+        >
           <Search size={16} color="var(--text-subtle)" />
           <input 
             type="text"
@@ -99,16 +105,19 @@ export default function SearchControlBar({
         </div>
 
         {/* Location Input (Compact) */}
-        <div style={{
-          flex: '0 1 200px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          background: 'var(--bg-input)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '8px 12px'
-        }}>
+        <div 
+          className="search-location-input-wrap"
+          style={{
+            flex: '0 1 180px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'var(--bg-input)',
+            border: '1px dashed #cbd5e1',
+            borderRadius: 0,
+            padding: '8px 12px'
+          }}
+        >
           <MapPin size={15} color="var(--text-subtle)" />
           <input 
             type="text"
@@ -129,14 +138,17 @@ export default function SearchControlBar({
         </div>
 
         {/* Workplace Pill Toggles */}
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          background: 'var(--bg-input)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '3px'
-        }}>
+        <div 
+          className="search-workplace-pills"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            background: 'var(--bg-input)',
+            border: '1px dashed #cbd5e1',
+            borderRadius: 0,
+            padding: '3px'
+          }}
+        >
           {workplaceOptions.map((opt) => {
             const isSelected = workplace === opt.value;
             return (
@@ -148,7 +160,7 @@ export default function SearchControlBar({
                   background: isSelected ? '#780115' : 'transparent',
                   color: isSelected ? '#ffffff' : 'var(--text-muted)',
                   border: 'none',
-                  borderRadius: '4px',
+                  borderRadius: 0,
                   padding: '5px 10px',
                   fontSize: '0.78rem',
                   fontWeight: isSelected ? 700 : 500,
@@ -166,14 +178,16 @@ export default function SearchControlBar({
         <button 
           onClick={onSearchOrCrawl}
           disabled={isSearching}
+          className="search-submit-btn"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: '6px',
             backgroundColor: '#780115',
             color: '#ffffff',
             border: 'none',
-            borderRadius: 'var(--radius-sm)',
+            borderRadius: 0,
             padding: '9px 18px',
             fontSize: '0.88rem',
             fontWeight: 700,

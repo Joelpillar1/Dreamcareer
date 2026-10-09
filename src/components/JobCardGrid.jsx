@@ -627,29 +627,7 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
 
   return (
     <div 
-      style={{
-        background: '#ffffff',
-        border: '1px dashed #cbd5e1',
-        borderRadius: 0,
-        padding: '24px 22px 20px 22px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
-        transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
-        minHeight: '230px',
-        position: 'relative'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.06)';
-        e.currentTarget.style.borderColor = '#780115';
-        e.currentTarget.style.transform = 'translateY(-2px)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.02)';
-        e.currentTarget.style.borderColor = '#cbd5e1';
-        e.currentTarget.style.transform = 'translateY(0)';
-      }}
+      className="careerhut-job-card"
     >
       {/* Corner Plus Accents */}
       <CornerPlusMarkers color="#94a3b8" bg="#ffffff" size="13px" />
@@ -699,15 +677,8 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
           </button>
         </div>
 
-        {/* Tag Pills: Single non-breaking line with limited tags */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'nowrap',
-          overflow: 'hidden',
-          gap: '6px',
-          alignItems: 'center',
-          marginBottom: '14px'
-        }}>
+        {/* Tag Pills: Single non-breaking line on desktop, clean wrap on mobile */}
+        <div className="job-card-tags-row">
           {/* Green Workplace Pill */}
           <span style={{
             background: '#ecfdf5',
@@ -858,19 +829,13 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
         </div>
       </div>
 
-      {/* Bottom Action: 3 Buttons on a Single Line */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'auto 1fr 1fr',
-        alignItems: 'center',
-        gap: '6px',
-        width: '100%',
-        marginTop: 'auto'
-      }}>
+      {/* Bottom Action: 3 Buttons on a Single Line (Responsive Stacking on Mobile) */}
+      <div className="job-card-actions-row">
         <a
           href={applyHref}
           target="_blank"
           rel="noopener noreferrer"
+          className="job-card-apply-btn"
           style={{
             background: '#780115',
             color: '#ffffff',
@@ -899,6 +864,7 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
           href={careerPortalHref}
           target="_blank"
           rel="noopener noreferrer"
+          className="job-card-secondary-btn"
           title={`Visit official ${job.company || 'company'} careers page`}
           style={{
             background: '#ffffff',
@@ -935,6 +901,7 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
 
         <button
           onClick={() => onOpenReachout(job)}
+          className="job-card-secondary-btn"
           title="Open Company Outreach & Hiring Team Directory"
           style={{
             background: '#fff1f2',
@@ -1010,16 +977,8 @@ export default function JobCardGrid({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Cards 3-Column Responsive Grid (Strict 3 Cards Per Row) */}
-      <div 
-        className="careerhut-3col-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-          gap: '20px',
-          alignItems: 'stretch'
-        }}
-      >
+      {/* Cards 3-Column Responsive Grid */}
+      <div className="careerhut-3col-grid">
         {visibleJobs.map((job) => (
           <JobCard 
             key={job.id} 

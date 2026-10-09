@@ -15,7 +15,8 @@ import {
   Moon,
   Bell,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  X
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -81,9 +82,12 @@ export default function DashboardSidebar({
   onlyBookmarked,
   onToggleBookmarked,
   onResetFilters,
-  onGoToLanding
+  onGoToLanding,
+  isMobileDrawer = false,
+  onCloseMobile
 }) {
   const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (isMobileDrawer) return false;
     return localStorage.getItem('careerhut_sidebar_collapsed') === 'true';
   });
   const [profileOpen, setProfileOpen] = useState(false);
@@ -91,6 +95,7 @@ export default function DashboardSidebar({
   const profileContainerRef = useRef(null);
 
   const toggleCollapsed = () => {
+    if (isMobileDrawer) return;
     setIsCollapsed(prev => {
       const next = !prev;
       localStorage.setItem('careerhut_sidebar_collapsed', String(next));
@@ -122,36 +127,46 @@ export default function DashboardSidebar({
   ];
 
   const isAllJobsActive = !onlyBookmarked && !hasEmailOnly && !selectedCompany;
+  const effectiveCollapsed = isMobileDrawer ? false : isCollapsed;
+
+  const handleItemClick = (action) => {
+    action();
+    if (isMobileDrawer && onCloseMobile) {
+      onCloseMobile();
+    }
+  };
 
   return (
     <aside style={{
-      width: isCollapsed ? '68px' : '260px',
-      minWidth: isCollapsed ? '68px' : '260px',
+      width: isMobileDrawer ? '100%' : (effectiveCollapsed ? '68px' : '260px'),
+      minWidth: isMobileDrawer ? '100%' : (effectiveCollapsed ? '68px' : '260px'),
       flexShrink: 0,
       background: 'var(--bg-surface)',
-      borderRight: '1px solid var(--border-color)',
+      borderRight: isMobileDrawer ? 'none' : '1px solid var(--border-color)',
       display: 'flex',
       flexDirection: 'column',
-      height: '100vh',
+      height: '100%',
+      maxHeight: '100vh',
       overflow: 'hidden',
       zIndex: 10,
-      transition: 'width 0.22s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
+      transition: isMobileDrawer ? 'none' : 'width 0.22s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
       userSelect: 'none'
     }}>
       {/* Brand Header */}
       <div style={{
-        padding: isCollapsed ? '16px 12px' : '18px 16px 18px 20px',
+        padding: effectiveCollapsed ? '16px 12px' : '18px 16px 18px 20px',
         borderBottom: '1px solid var(--border-color)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: isCollapsed ? 'center' : 'space-between',
+        justifyContent: effectiveCollapsed ? 'center' : 'space-between',
         height: '69px',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        flexShrink: 0
       }}>
-        {!isCollapsed ? (
+        {!effectiveCollapsed ? (
           <>
             <div 
-              onClick={onGoToLanding}
+              onClick={() => handleItemClick(onGoToLanding)}
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -182,32 +197,54 @@ export default function DashboardSidebar({
               </div>
             </div>
 
-            <button
-              onClick={toggleCollapsed}
-              title="Collapse sidebar"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-subtle)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '6px',
-                borderRadius: 'var(--radius-sm)',
-                cursor: 'pointer',
-                transition: 'var(--transition)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--text-main)';
-                e.currentTarget.style.background = 'var(--bg-secondary)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-subtle)';
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <PanelLeftClose size={18} />
-            </button>
+            {isMobileDrawer ? (
+              <button
+                onClick={onCloseMobile}
+                title="Close menu"
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  transition: 'var(--transition)'
+                }}
+              >
+                <X size={16} />
+              </button>
+            ) : (
+              <button
+                onClick={toggleCollapsed}
+                title="Collapse sidebar"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-subtle)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '6px',
+                  borderRadius: 'var(--radius-sm)',
+                  cursor: 'pointer',
+                  transition: 'var(--transition)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--text-main)';
+                  e.currentTarget.style.background = 'var(--bg-secondary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--text-subtle)';
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                <PanelLeftClose size={18} />
+              </button>
+            )}
           </>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
@@ -245,14 +282,15 @@ export default function DashboardSidebar({
       <div style={{
         flex: 1,
         overflowY: 'auto',
-        padding: isCollapsed ? '16px 8px' : '16px 14px',
+        padding: effectiveCollapsed ? '16px 8px' : '16px 14px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px'
+        gap: '20px',
+        WebkitOverflowScrolling: 'touch'
       }}>
         {/* Section 1: Main Views */}
         <div>
-          {!isCollapsed && (
+          {!effectiveCollapsed && (
             <div style={SECTION_LABEL_STYLE}>
               <span>Navigation</span>
             </div>
@@ -261,17 +299,17 @@ export default function DashboardSidebar({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {/* All Jobs */}
             <button
-              onClick={() => {
+              onClick={() => handleItemClick(() => {
                 if (onlyBookmarked) onToggleBookmarked(false);
                 if (hasEmailOnly) onToggleHasEmail(false);
                 if (selectedCompany) onSelectCompany('');
-              }}
-              title={isCollapsed ? `All Direct Jobs (${totalJobsCount?.toLocaleString() || '680+'})` : undefined}
+              })}
+              title={effectiveCollapsed ? `All Direct Jobs (${totalJobsCount?.toLocaleString() || '680+'})` : undefined}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: isCollapsed ? 'center' : 'space-between',
-                padding: isCollapsed ? '10px' : '8px 10px',
+                justifyContent: effectiveCollapsed ? 'center' : 'space-between',
+                padding: effectiveCollapsed ? '10px' : '8px 10px',
                 borderRadius: 'var(--radius-sm)',
                 background: isAllJobsActive ? 'var(--primary-light)' : 'transparent',
                 color: isAllJobsActive ? 'var(--primary-text)' : 'var(--text-main)',
@@ -281,7 +319,8 @@ export default function DashboardSidebar({
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'var(--transition)',
-                position: 'relative'
+                position: 'relative',
+                touchAction: 'manipulation'
               }}
               onMouseEnter={(e) => {
                 if (!isAllJobsActive) e.currentTarget.style.background = 'var(--bg-secondary)';
@@ -292,9 +331,9 @@ export default function DashboardSidebar({
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
                 <Compass size={17} color={isAllJobsActive ? 'var(--primary)' : 'var(--text-subtle)'} />
-                {!isCollapsed && <span>All Direct Jobs</span>}
+                {!effectiveCollapsed && <span>All Direct Jobs</span>}
               </div>
-              {!isCollapsed && (
+              {!effectiveCollapsed && (
                 <span style={{
                   fontSize: '0.72rem',
                   fontWeight: 700,
@@ -310,13 +349,13 @@ export default function DashboardSidebar({
 
             {/* Saved Jobs */}
             <button
-              onClick={() => onToggleBookmarked(!onlyBookmarked)}
-              title={isCollapsed ? `Saved Roles (${bookmarkedCount})` : undefined}
+              onClick={() => handleItemClick(() => onToggleBookmarked(!onlyBookmarked))}
+              title={effectiveCollapsed ? `Saved Roles (${bookmarkedCount})` : undefined}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: isCollapsed ? 'center' : 'space-between',
-                padding: isCollapsed ? '10px' : '8px 10px',
+                justifyContent: effectiveCollapsed ? 'center' : 'space-between',
+                padding: effectiveCollapsed ? '10px' : '8px 10px',
                 borderRadius: 'var(--radius-sm)',
                 background: onlyBookmarked ? 'var(--primary-light)' : 'transparent',
                 color: onlyBookmarked ? 'var(--primary-text)' : 'var(--text-main)',
@@ -326,7 +365,8 @@ export default function DashboardSidebar({
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'var(--transition)',
-                position: 'relative'
+                position: 'relative',
+                touchAction: 'manipulation'
               }}
               onMouseEnter={(e) => {
                 if (!onlyBookmarked) e.currentTarget.style.background = 'var(--bg-secondary)';
@@ -337,10 +377,10 @@ export default function DashboardSidebar({
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
                 <Bookmark size={17} color={onlyBookmarked ? 'var(--primary)' : 'var(--text-subtle)'} />
-                {!isCollapsed && <span>Saved Roles</span>}
+                {!effectiveCollapsed && <span>Saved Roles</span>}
               </div>
               {bookmarkedCount > 0 && (
-                !isCollapsed ? (
+                !effectiveCollapsed ? (
                   <span style={{
                     fontSize: '0.72rem',
                     fontWeight: 700,
@@ -367,13 +407,13 @@ export default function DashboardSidebar({
 
             {/* Direct Recruiter Contacts */}
             <button
-              onClick={() => onToggleHasEmail(!hasEmailOnly)}
-              title={isCollapsed ? "Recruiter Contacts (Verified Direct Emails)" : undefined}
+              onClick={() => handleItemClick(() => onToggleHasEmail(!hasEmailOnly))}
+              title={effectiveCollapsed ? "Recruiter Contacts (Verified Direct Emails)" : undefined}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: isCollapsed ? 'center' : 'space-between',
-                padding: isCollapsed ? '10px' : '8px 10px',
+                justifyContent: effectiveCollapsed ? 'center' : 'space-between',
+                padding: effectiveCollapsed ? '10px' : '8px 10px',
                 borderRadius: 'var(--radius-sm)',
                 background: hasEmailOnly ? 'var(--primary-light)' : 'transparent',
                 color: hasEmailOnly ? 'var(--primary-text)' : 'var(--text-main)',
@@ -383,7 +423,8 @@ export default function DashboardSidebar({
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'var(--transition)',
-                position: 'relative'
+                position: 'relative',
+                touchAction: 'manipulation'
               }}
               onMouseEnter={(e) => {
                 if (!hasEmailOnly) e.currentTarget.style.background = 'var(--bg-secondary)';
@@ -394,9 +435,9 @@ export default function DashboardSidebar({
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
                 <Mail size={17} color={hasEmailOnly ? 'var(--primary)' : 'var(--text-subtle)'} />
-                {!isCollapsed && <span>Recruiter Contacts</span>}
+                {!effectiveCollapsed && <span>Recruiter Contacts</span>}
               </div>
-              {!isCollapsed ? (
+              {!effectiveCollapsed ? (
                 <span style={{
                   fontSize: '0.68rem',
                   fontWeight: 600,
@@ -426,7 +467,7 @@ export default function DashboardSidebar({
 
         {/* Section 2: Direct Company Portals */}
         <div>
-          {!isCollapsed ? (
+          {!effectiveCollapsed ? (
             <div style={{
               fontSize: '0.7rem',
               fontWeight: 700,
@@ -449,21 +490,21 @@ export default function DashboardSidebar({
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: isCollapsed ? '6px' : '2px',
-            maxHeight: isCollapsed ? '280px' : '320px',
+            gap: effectiveCollapsed ? '6px' : '2px',
+            maxHeight: effectiveCollapsed ? '280px' : '320px',
             overflowY: 'auto',
             paddingRight: '2px',
-            alignItems: isCollapsed ? 'center' : 'stretch'
+            alignItems: effectiveCollapsed ? 'center' : 'stretch'
           }}>
             {companies.map((c) => {
               const isSelected = selectedCompany === c.company;
               const logoUrl = companyLogos[c.company] || c.company_logo || null;
 
-              if (isCollapsed) {
+              if (effectiveCollapsed) {
                 return (
                   <button
                     key={c.company}
-                    onClick={() => onSelectCompany(isSelected ? '' : c.company)}
+                    onClick={() => handleItemClick(() => onSelectCompany(isSelected ? '' : c.company))}
                     title={`${c.company} (${c.job_count} roles)`}
                     style={{
                       display: 'flex',
@@ -491,7 +532,7 @@ export default function DashboardSidebar({
               return (
                 <button
                   key={c.company}
-                  onClick={() => onSelectCompany(isSelected ? '' : c.company)}
+                  onClick={() => handleItemClick(() => onSelectCompany(isSelected ? '' : c.company))}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -535,7 +576,7 @@ export default function DashboardSidebar({
 
         {/* Section 3: Locations */}
         <div>
-          {!isCollapsed ? (
+          {!effectiveCollapsed ? (
             <div style={SECTION_LABEL_STYLE}>
               Countries
             </div>
@@ -546,21 +587,21 @@ export default function DashboardSidebar({
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: isCollapsed ? '6px' : '2px',
-            maxHeight: isCollapsed ? '240px' : '320px',
+            gap: effectiveCollapsed ? '6px' : '2px',
+            maxHeight: effectiveCollapsed ? '240px' : '320px',
             overflowY: 'auto',
             paddingRight: '2px',
-            alignItems: isCollapsed ? 'center' : 'stretch'
+            alignItems: effectiveCollapsed ? 'center' : 'stretch'
           }}>
             {locationItems.map((item) => {
               const isSelected = selectedLocation === item.value;
 
-              if (isCollapsed) {
+              if (effectiveCollapsed) {
                 return (
                   <button
                     key={item.value || item.label}
                     title={item.count != null ? `${item.label} (${item.count})` : item.label}
-                    onClick={() => onSelectLocation(isSelected ? '' : item.value)}
+                    onClick={() => handleItemClick(() => onSelectLocation(isSelected ? '' : item.value))}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -590,7 +631,7 @@ export default function DashboardSidebar({
                 <button
                   key={item.value || item.label}
                   title={item.count != null ? `${item.count} roles in ${item.label}` : item.label}
-                  onClick={() => onSelectLocation(isSelected ? '' : item.value)}
+                  onClick={() => handleItemClick(() => onSelectLocation(isSelected ? '' : item.value))}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -636,7 +677,7 @@ export default function DashboardSidebar({
             })}
           </div>
 
-          {!isCollapsed && regions.length > 0 && (
+          {!effectiveCollapsed && regions.length > 0 && (
             <div style={{ marginTop: '14px' }}>
               <div style={SECTION_LABEL_STYLE}>Regions</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -646,7 +687,7 @@ export default function DashboardSidebar({
                     <button
                       key={item.value || item.label}
                       title={item.count != null ? `${item.count} roles in ${item.label}` : item.label}
-                      onClick={() => onSelectLocation(isSelected ? '' : item.value)}
+                      onClick={() => handleItemClick(() => onSelectLocation(isSelected ? '' : item.value))}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -699,16 +740,16 @@ export default function DashboardSidebar({
       {/* Bottom User Profile Section with Popover Menu */}
       <div 
         ref={profileContainerRef}
-        style={{ position: 'relative' }}
+        style={{ position: 'relative', flexShrink: 0 }}
       >
         {/* Popover Dropup Menu */}
         {profileOpen && (
           <div style={{
             position: 'absolute',
-            bottom: isCollapsed ? '12px' : 'calc(100% + 8px)',
-            left: isCollapsed ? '76px' : '10px',
-            right: isCollapsed ? 'auto' : '10px',
-            width: isCollapsed ? '250px' : 'auto',
+            bottom: effectiveCollapsed ? '12px' : 'calc(100% + 8px)',
+            left: effectiveCollapsed ? '76px' : '10px',
+            right: effectiveCollapsed ? 'auto' : '10px',
+            width: effectiveCollapsed ? '250px' : 'auto',
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-md)',
@@ -909,14 +950,14 @@ export default function DashboardSidebar({
         {/* Profile Card Trigger Button */}
         <div 
           onClick={() => setProfileOpen(!profileOpen)}
-          title={isCollapsed ? "Joel Morgan (Profile & Settings)" : undefined}
+          title={effectiveCollapsed ? "Joel Morgan (Profile & Settings)" : undefined}
           style={{
-            padding: isCollapsed ? '12px 10px' : '12px 14px',
+            padding: effectiveCollapsed ? '12px 10px' : '12px 14px',
             borderTop: '1px solid var(--border-color)',
             background: profileOpen ? 'var(--bg-tag)' : 'var(--bg-secondary)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: isCollapsed ? 'center' : 'space-between',
+            justifyContent: effectiveCollapsed ? 'center' : 'space-between',
             cursor: 'pointer',
             transition: 'var(--transition)',
             userSelect: 'none'
@@ -959,7 +1000,7 @@ export default function DashboardSidebar({
             </div>
 
             {/* User Meta */}
-            {!isCollapsed && (
+            {!effectiveCollapsed && (
               <div style={{ minWidth: 0 }}>
                 <div style={{
                   fontWeight: 700,
@@ -985,7 +1026,7 @@ export default function DashboardSidebar({
           </div>
 
           {/* Arrow / Chevron Toggle indicator */}
-          {!isCollapsed && (
+          {!effectiveCollapsed && (
             <div style={{
               color: profileOpen ? 'var(--primary)' : 'var(--text-subtle)',
               padding: '4px',

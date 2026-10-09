@@ -9,6 +9,7 @@ import JobCardGrid from './components/JobCardGrid';
 import { DIRECT_CAREER_JOBS } from './data/directJobs';
 import { buildLocationLists, jobGeo } from './utils/locations';
 import { resolveLogoUrl } from './components/CompanyLogo';
+import { Menu, Bookmark } from 'lucide-react';
 
 function normalizeCompanyName(name) {
   if (!name) return name;
@@ -158,6 +159,7 @@ export default function App() {
   
   // Modals
   const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Filters
   const [keyword, setKeyword] = useState('');
@@ -585,133 +587,227 @@ export default function App() {
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      width: '100vw',
-      height: '100vh',
-      overflow: 'hidden',
-      background: 'var(--bg-app)'
-    }}>
-      {/* Left Docked Sidebar */}
-      <DashboardSidebar 
-        totalJobsCount={jobs.length}
-        bookmarkedCount={bookmarkedCount}
-        companies={companies}
-        companyLogos={companyLogos}
-        selectedCompany={company}
-        onSelectCompany={setCompany}
-        selectedWorkplace={workplace}
-        onSelectWorkplace={setWorkplace}
-        selectedLocation={location}
-        onSelectLocation={setLocation}
-        countries={locationLists.countries}
-        regions={locationLists.regions}
-        hasEmailOnly={hasEmail}
-        onToggleHasEmail={setHasEmail}
-        onlyBookmarked={onlyBookmarked}
-        onToggleBookmarked={setOnlyBookmarked}
-        onResetFilters={handleResetFilters}
-        onGoToLanding={handleGoToLanding}
-      />
+    <div className="dashboard-app-wrapper">
+      {/* Desktop Left Docked Sidebar */}
+      <div className="desktop-sidebar-container">
+        <DashboardSidebar 
+          totalJobsCount={jobs.length}
+          bookmarkedCount={bookmarkedCount}
+          companies={companies}
+          companyLogos={companyLogos}
+          selectedCompany={company}
+          onSelectCompany={setCompany}
+          selectedWorkplace={workplace}
+          onSelectWorkplace={setWorkplace}
+          selectedLocation={location}
+          onSelectLocation={setLocation}
+          countries={locationLists.countries}
+          regions={locationLists.regions}
+          hasEmailOnly={hasEmail}
+          onToggleHasEmail={setHasEmail}
+          onlyBookmarked={onlyBookmarked}
+          onToggleBookmarked={setOnlyBookmarked}
+          onResetFilters={handleResetFilters}
+          onGoToLanding={handleGoToLanding}
+        />
+      </div>
 
-      {/* Main Content Pane */}
-      <main style={{
-        flex: 1,
-        minWidth: 0,
-        height: '100vh',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '20px 28px 40px',
-        gap: '16px'
-      }}      >
-        {/* Top-of-page loading state while the jobs dataset streams in */}
-        {isLoading && (
-          <div
-            role="status"
-            aria-live="polite"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              background: 'var(--primary-light)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '10px 14px',
-              flexShrink: 0
-            }}
-          >
-            <span className="spinner-loading" style={{ flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Mobile Off-Canvas Drawer Backdrop */}
+      {mobileSidebarOpen && (
+        <div 
+          className="mobile-drawer-backdrop"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile Off-Canvas Drawer Pane */}
+      {mobileSidebarOpen && (
+        <div className="mobile-drawer-pane">
+          <DashboardSidebar 
+            totalJobsCount={jobs.length}
+            bookmarkedCount={bookmarkedCount}
+            companies={companies}
+            companyLogos={companyLogos}
+            selectedCompany={company}
+            onSelectCompany={setCompany}
+            selectedWorkplace={workplace}
+            onSelectWorkplace={setWorkplace}
+            selectedLocation={location}
+            onSelectLocation={setLocation}
+            countries={locationLists.countries}
+            regions={locationLists.regions}
+            hasEmailOnly={hasEmail}
+            onToggleHasEmail={setHasEmail}
+            onlyBookmarked={onlyBookmarked}
+            onToggleBookmarked={setOnlyBookmarked}
+            onResetFilters={handleResetFilters}
+            onGoToLanding={handleGoToLanding}
+            isMobileDrawer={true}
+            onCloseMobile={() => setMobileSidebarOpen(false)}
+          />
+        </div>
+      )}
+
+      {/* Right Column / Main Pane */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+        {/* Mobile Header Bar (Visible on <= 900px) */}
+        <header className="mobile-header-bar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button 
+              onClick={() => setMobileSidebarOpen(true)}
+              aria-label="Open filter menu"
+              style={{
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '6px 8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: 'var(--text-main)'
+              }}
+            >
+              <Menu size={18} />
+            </button>
+            <div 
+              onClick={handleGoToLanding} 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+              title="Careerhut Home"
+            >
               <div style={{
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                color: 'var(--primary-text)',
-                marginBottom: loadProgress.total ? '6px' : 0
+                width: '26px',
+                height: '26px',
+                borderRadius: '6px',
+                background: 'linear-gradient(135deg, #780115 0%, #9c0e24 100%)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                fontSize: '0.85rem'
               }}>
-                Loading jobs…
-                {loadProgress.total > 0 && (
-                  <span style={{ fontWeight: 600, opacity: 0.8 }}>
-                    {' '}({Math.min(loadProgress.loaded, loadProgress.total).toLocaleString()} of {loadProgress.total.toLocaleString()})
-                  </span>
-                )}
+                C
               </div>
-              {loadProgress.total > 0 && (
-                <div style={{
-                  height: '5px',
-                  background: 'rgba(120, 1, 21, 0.12)',
-                  borderRadius: 'var(--radius-full)',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${Math.min(100, Math.round((loadProgress.loaded / loadProgress.total) * 100))}%`,
-                    background: 'linear-gradient(90deg, #780115, #F7B638)',
-                    borderRadius: 'var(--radius-full)',
-                    transition: 'width 0.2s ease'
-                  }} />
-                </div>
-              )}
+              <span style={{ fontWeight: 800, fontSize: '0.96rem', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
+                Careerhut
+              </span>
             </div>
           </div>
-        )}
 
-        {loadError && (
-          <div style={{
-            background: '#fef2f2',
-            border: '1px solid #fecaca',
-            color: '#b91c1c',
-            borderRadius: 'var(--radius-sm)',
-            padding: '10px 14px',
-            fontSize: '0.84rem',
-            fontWeight: 600
-          }}>
-            Could not load jobs from the API ({loadError}). Showing built-in sample data. Start the backend with `python main.py` and reload.
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              onClick={() => setOnlyBookmarked(!onlyBookmarked)}
+              style={{
+                background: onlyBookmarked ? 'var(--primary-light)' : 'var(--bg-surface)',
+                border: `1px solid ${onlyBookmarked ? 'var(--primary)' : 'var(--border-color)'}`,
+                color: onlyBookmarked ? 'var(--primary)' : 'var(--text-muted)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '5px 9px',
+                fontSize: '0.76rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              <Bookmark size={13} color={onlyBookmarked ? 'var(--primary)' : 'currentColor'} />
+              <span>Saved{bookmarkedCount > 0 ? ` (${bookmarkedCount})` : ''}</span>
+            </button>
           </div>
-        )}
+        </header>
 
-        {/* Main Search & Control Bar */}
-        <SearchControlBar 
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-          workplace={workplace}
-          onWorkplaceChange={setWorkplace}
-          location={location}
-          onLocationChange={setLocation}
-          onSearchOrCrawl={handleSearchOrCrawl}
-          isSearching={isSearching}
-          activeTag={activeTag}
-          onSelectTag={setActiveTag}
-        />
+        {/* Main Content Pane */}
+        <main className="main-content-pane">
+          {/* Top-of-page loading state while the jobs dataset streams in */}
+          {isLoading && (
+            <div
+              role="status"
+              aria-live="polite"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: 'var(--primary-light)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '10px 14px',
+                flexShrink: 0
+              }}
+            >
+              <span className="spinner-loading" style={{ flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  color: 'var(--primary-text)',
+                  marginBottom: loadProgress.total ? '6px' : 0
+                }}>
+                  Loading jobs…
+                  {loadProgress.total > 0 && (
+                    <span style={{ fontWeight: 600, opacity: 0.8 }}>
+                      {' '}({Math.min(loadProgress.loaded, loadProgress.total).toLocaleString()} of {loadProgress.total.toLocaleString()})
+                    </span>
+                  )}
+                </div>
+                {loadProgress.total > 0 && (
+                  <div style={{
+                    height: '5px',
+                    background: 'rgba(120, 1, 21, 0.12)',
+                    borderRadius: 'var(--radius-full)',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${Math.min(100, Math.round((loadProgress.loaded / loadProgress.total) * 100))}%`,
+                      background: 'linear-gradient(90deg, #780115, #F7B638)',
+                      borderRadius: 'var(--radius-full)',
+                      transition: 'width 0.2s ease'
+                    }} />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-        {/* Main Job Cards Grid */}
-        <JobCardGrid 
-          jobs={filteredJobs}
-          onToggleBookmark={handleToggleBookmark}
-          onSelectJob={setSelectedJob}
-          onOpenFilterModal={() => setFilterModalOpen(true)}
-        />
-      </main>
+          {loadError && (
+            <div style={{
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#b91c1c',
+              borderRadius: 'var(--radius-sm)',
+              padding: '10px 14px',
+              fontSize: '0.84rem',
+              fontWeight: 600
+            }}>
+              Could not load jobs from the API ({loadError}). Showing built-in sample data. Start the backend with `python main.py` and reload.
+            </div>
+          )}
+
+          {/* Main Search & Control Bar */}
+          <SearchControlBar 
+            keyword={keyword}
+            onKeywordChange={setKeyword}
+            workplace={workplace}
+            onWorkplaceChange={setWorkplace}
+            location={location}
+            onLocationChange={setLocation}
+            onSearchOrCrawl={handleSearchOrCrawl}
+            isSearching={isSearching}
+            activeTag={activeTag}
+            onSelectTag={setActiveTag}
+          />
+
+          {/* Main Job Cards Grid */}
+          <JobCardGrid 
+            jobs={filteredJobs}
+            onToggleBookmark={handleToggleBookmark}
+            onSelectJob={setSelectedJob}
+            onOpenFilterModal={() => setFilterModalOpen(true)}
+          />
+        </main>
+      </div>
 
       {/* Filter Modal */}
       <FilterModal 
