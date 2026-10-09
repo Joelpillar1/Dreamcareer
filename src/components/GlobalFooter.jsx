@@ -32,43 +32,19 @@ export default function GlobalFooter({
         {/* Corner Plus Accents */}
         <CornerPlusMarkers color="#94a3b8" bg="#ffffff" size="13px" />
 
-        {/* Top Brand & Status Segment */}
+        {/* Top Brand Segment */}
         <div className="segmented-footer-top">
           <div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
               <img 
                 src="/Careerhut.png" 
                 alt="Careerhut" 
-                style={{ height: '30px', width: 'auto', maxWidth: '170px', objectFit: 'contain', display: 'block' }} 
+                style={{ height: '24px', width: 'auto', maxWidth: '140px', objectFit: 'contain', display: 'block' }} 
               />
             </div>
             <p style={{ fontSize: '0.86rem', color: '#64748b', maxWidth: '520px', margin: 0, lineHeight: 1.55 }}>
               Discover direct tech jobs, company career portals, and verified recruiter contacts from across the ecosystem.
             </p>
-          </div>
-
-          {/* Live Uptime Status Indicator */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '6px 14px',
-            borderRadius: '999px',
-            backgroundColor: '#ecfdf5',
-            border: '1px dashed #a7f3d0',
-            color: '#059669',
-            fontSize: '0.78rem',
-            fontWeight: 600,
-            flexShrink: 0
-          }}>
-            <span style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              boxShadow: '0 0 6px #10b981'
-            }} />
-            <span>All services are online</span>
           </div>
         </div>
 
