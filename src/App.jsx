@@ -649,7 +649,7 @@ export default function App() {
       )}
 
       {/* Right Column / Main Pane */}
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minWidth: 0, width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
         {/* Mobile Header Bar (Visible on <= 900px) */}
         <header className="mobile-header-bar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

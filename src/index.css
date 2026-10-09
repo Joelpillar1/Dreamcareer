@@ -248,6 +248,9 @@ body {
   gap: 20px;
   align-items: stretch;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (max-width: 1240px) {
@@ -259,8 +262,10 @@ body {
 
 @media (max-width: 768px) {
   .careerhut-3col-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -278,7 +283,10 @@ body {
   min-height: 230px;
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .careerhut-job-card:hover {
@@ -293,6 +301,9 @@ body {
   gap: 6px;
   align-items: center;
   margin-bottom: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .job-card-actions-row {
@@ -301,7 +312,15 @@ body {
   align-items: center;
   gap: 6px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   margin-top: auto;
+}
+
+.job-card-actions-row > * {
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (max-width: 640px) {
@@ -315,6 +334,7 @@ body {
   .job-card-actions-row {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+    width: 100%;
   }
   .job-card-actions-row .job-card-apply-btn {
     grid-column: 1 / -1;
@@ -325,10 +345,19 @@ body {
   .job-card-actions-row .job-card-secondary-btn {
     padding: 8px 6px;
     font-size: 0.78rem;
+    width: 100%;
   }
 }
 
 /* Responsive Search Control Bar */
+.search-control-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
 @media (max-width: 640px) {
   .search-control-container {
     padding: 12px 12px !important;
@@ -336,35 +365,45 @@ body {
   }
   .search-control-row {
     gap: 8px !important;
+    width: 100% !important;
   }
   .search-main-input-wrap {
     flex: 1 1 100% !important;
     width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
   .search-location-input-wrap {
     flex: 1 1 100% !important;
     width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
   .search-workplace-pills {
     width: 100% !important;
     display: flex !important;
     justify-content: space-between !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
   .search-workplace-pills button {
     flex: 1 !important;
     text-align: center !important;
     padding: 6px 4px !important;
+    min-width: 0 !important;
   }
   .search-submit-btn {
     width: 100% !important;
     padding: 10px 16px !important;
+    min-width: 0 !important;
   }
 }
 
 /* Responsive Dashboard Layout */
 .dashboard-app-wrapper {
   display: flex;
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
   height: 100vh;
   overflow: hidden;
   background: var(--bg-app);
@@ -373,11 +412,18 @@ body {
 .main-content-pane {
   flex: 1;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   padding: 20px 28px 40px;
+  gap: 16px;
+  -webkit-overflow-scrolling: touch;
+}
   gap: 16px;
   -webkit-overflow-scrolling: touch;
 }
