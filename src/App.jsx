@@ -140,8 +140,12 @@ export function mixCompanies(jobList) {
 
 export default function App() {
   const [currentView, setCurrentView] = useState(() => {
-    if (typeof window !== 'undefined' && (window.location.hash === '#dashboard' || window.location.hash === '#jobs')) {
-      return 'dashboard';
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      const pathname = window.location.pathname;
+      if (hash === '#dashboard' || hash === '#jobs' || pathname === '/dashboard' || pathname === '/jobs') {
+        return 'dashboard';
+      }
     }
     return 'landing';
   });
@@ -169,6 +173,25 @@ export default function App() {
 
   useEffect(() => {
     loadAllData();
+
+    const handleUrlChange = () => {
+      if (typeof window !== 'undefined') {
+        const hash = window.location.hash;
+        const pathname = window.location.pathname;
+        if (hash === '#dashboard' || hash === '#jobs' || pathname === '/dashboard' || pathname === '/jobs') {
+          setCurrentView('dashboard');
+        } else {
+          setCurrentView('landing');
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleUrlChange);
+    window.addEventListener('popstate', handleUrlChange);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlChange);
+      window.removeEventListener('popstate', handleUrlChange);
+    };
   }, []);
 
   // Page through the entire dataset. The sidebar lists every company from
@@ -434,7 +457,7 @@ export default function App() {
     }
     setCurrentView('dashboard');
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', '#jobs');
+      window.history.pushState(null, '', '#dashboard');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -442,7 +465,7 @@ export default function App() {
   const handleCrawlFromLanding = async (url) => {
     setCurrentView('dashboard');
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', '#jobs');
+      window.history.pushState(null, '', '#dashboard');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     setKeyword(url);
@@ -476,7 +499,7 @@ export default function App() {
   const handleGoToLanding = () => {
     setCurrentView('landing');
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', '#');
+      window.history.pushState(null, '', '#');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
