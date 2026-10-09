@@ -177,9 +177,10 @@ export default function JobFeedList({ jobs, selectedJob, onSelectJob, onOpenFilt
                 }}>
                   <span style={{
                     fontSize: '0.68rem',
-                    fontWeight: 600,
-                    color: isRemote ? '#059669' : 'var(--text-muted)',
-                    background: isRemote ? '#ecfdf5' : 'var(--bg-tag)',
+                    fontWeight: 700,
+                    color: isRemote ? '#780115' : 'var(--text-muted)',
+                    background: isRemote ? '#fff1f2' : 'var(--bg-tag)',
+                    border: isRemote ? '1px dashed #fecdd3' : '1px solid var(--border-color)',
                     padding: '1px 6px',
                     borderRadius: '4px'
                   }}>

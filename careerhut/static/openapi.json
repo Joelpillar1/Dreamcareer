@@ -1,0 +1,134 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Careerhut Direct Career Discovery API",
+    "version": "2.4.0",
+    "description": "API for searching, filtering, and indexing verified tech job listings directly from official company career portals."
+  },
+  "servers": [
+    {
+      "url": "https://careerhut.org",
+      "description": "Production Server"
+    },
+    {
+      "url": "http://localhost:5173",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/data/jobs.json": {
+      "get": {
+        "summary": "Get all active verified jobs",
+        "description": "Returns the complete database of live job openings indexed from official employer career pages.",
+        "responses": {
+          "200": {
+            "description": "A list of verified job postings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/companies.json": {
+      "get": {
+        "summary": "Get indexed companies",
+        "description": "Returns all companies currently tracked by the Careerhut ingestion engine.",
+        "responses": {
+          "200": {
+            "description": "List of companies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Company"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/crawl": {
+      "post": {
+        "summary": "Ingest career portal URL",
+        "description": "Scrapes and parses an official company careers page in real time.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://stripe.com/jobs"
+                  }
+                },
+                "required": ["url"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Extraction result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "extracted_count": { "type": "integer" },
+                    "jobs": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Job" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Job": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "role": { "type": "string" },
+          "company": { "type": "string" },
+          "location": { "type": "string" },
+          "workplace_type": { "type": "string", "enum": ["Remote", "Hybrid", "On-Site"] },
+          "url": { "type": "string", "format": "uri" },
+          "contact_email": { "type": "string", "nullable": true },
+          "salary": { "type": "string", "nullable": true },
+          "description": { "type": "string" },
+          "skills": { "type": "array", "items": { "type": "string" } },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "Company": {
+        "type": "object",
+        "properties": {
+          "company": { "type": "string" },
+          "job_count": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

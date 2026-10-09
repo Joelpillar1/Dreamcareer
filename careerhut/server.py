@@ -6,12 +6,13 @@ Includes support for single/batch crawling, application pipeline tracker, bookma
 import os
 import gzip
 import json
+import sqlite3
 import time
 import threading
 import urllib.parse
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 
 from .models import ScrapeRequest, ScrapeResult, JobListing
 from .crawler import CareerCrawler
@@ -107,6 +108,92 @@ def _run_mass_fetch(companies: List[Any], max_jobs: int, workers: int):
             _mass_state["finished_at"] = time.time()
 
 
+# --- List read cache ------------------------------------------------------
+# A full /api/jobs load pages through every row, and every row carries its
+# full description: building that list costs a multi-second full-table read
+# (~10s per 2,000 rows on a loaded machine) plus ~10-17 MB of JSON per page,
+# so one dashboard load re-pays that cost six times - easily slow enough for
+# a page request to die and silently fall back to the embedded 709-row demo
+# dataset. Build the snapshot once in the background instead, serve every
+# page (plus stats/companies) from memory, and refresh whenever the row
+# count moves so roles written by a crawl still show up within seconds.
+_CACHE_TTL = 30.0
+_JOBS_KEY = "jobs:all"
+_STATS_KEY = "stats"
+_COMPANIES_KEY = "companies"
+_cache_lock = threading.Lock()
+_cache_entries: Dict[str, Tuple[float, Any]] = {}
+_cache_key_locks: Dict[str, threading.Lock] = {}
+
+
+def _cached(key: str, builder):
+    """Serve a cached value, rebuilding at most once per key at a time.
+
+    Concurrent page requests for the same key wait on the key lock rather
+    than each repeating the expensive build (thundering herd).
+    """
+    with _cache_lock:
+        entry = _cache_entries.get(key)
+        if entry and time.time() - entry[0] < _CACHE_TTL:
+            return entry[1]
+        lock = _cache_key_locks.get(key)
+        if lock is None:
+            lock = threading.Lock()
+            _cache_key_locks[key] = lock
+    with lock:
+        entry = _cache_entries.get(key)
+        if entry and time.time() - entry[0] < _CACHE_TTL:
+            return entry[1]
+        value = builder()
+        _cache_entries[key] = (time.time(), value)
+        return value
+
+
+def _build_all_jobs() -> List[Dict[str, Any]]:
+    # "No cap" limit with the same ORDER BY the paged query uses, so a
+    # rows[offset:offset+limit] slice matches what SQLite would have returned.
+    return [j.dict() for j in storage.get_jobs(limit=100000, offset=0)]
+
+
+def _row_count() -> int:
+    """Cheap change signal for the refresher - COUNT(*) runs in ~0.05s."""
+    try:
+        conn = sqlite3.connect(storage.db_path, timeout=5.0)
+        try:
+            return int(conn.execute("SELECT COUNT(*) FROM jobs").fetchone()[0])
+        finally:
+            conn.close()
+    except Exception:
+        return -1
+
+
+def _cache_refresher():
+    # Daemon loop: warm the snapshot before the first page load, then keep
+    # it in step with the database. Rebuilding only on a row-count change
+    # (plus a staleness cap for in-place updates) keeps this cheap at idle.
+    while True:
+        time.sleep(5)
+        try:
+            with _cache_lock:
+                job_entry = _cache_entries.get(_JOBS_KEY)
+                stats_entry = _cache_entries.get(_STATS_KEY)
+            now = time.time()
+            rows = job_entry[1] if job_entry else None
+            job_age = (now - job_entry[0]) if job_entry else 1e9
+            stats_age = (now - stats_entry[0]) if stats_entry else 1e9
+            count = _row_count()
+            if rows is None or job_age > 180.0 or (count >= 0 and len(rows) != count):
+                _cached(_JOBS_KEY, _build_all_jobs)
+                stats_age = 1e9  # totals moved together with the rows
+            if stats_age > _CACHE_TTL:
+                _cached(_STATS_KEY, storage.get_stats)
+        except Exception:
+            continue  # never let one bad read kill the warmer
+
+
+threading.Thread(target=_cache_refresher, daemon=True).start()
+
+
 class CareerhutRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(STATIC_DIR), **kwargs)
@@ -124,27 +211,35 @@ class CareerhutRequestHandler(SimpleHTTPRequestHandler):
             app_status = params.get("app_status", [None])[0]
             only_bookmarked = params.get("only_bookmarked", ["false"])[0].lower() == "true"
             limit = int(params.get("limit", [5000])[0])
-            offset = int(params.get("offset", [0])[0])
+            offset = max(0, int(params.get("offset", [0])[0]))
 
-            jobs = storage.get_jobs(
-                company=company,
-                search_query=q,
-                location=location,
-                workplace_type=workplace_type,
-                app_status=app_status,
-                only_bookmarked=only_bookmarked,
-                limit=limit,
-                offset=offset
+            # Filtered queries go straight to SQLite; the unfiltered feed the
+            # dashboard pages through is served from the shared snapshot.
+            has_filters = bool(
+                company or q or location or app_status or only_bookmarked
+                or (workplace_type and workplace_type.lower() != "all")
             )
-            self._send_json([j.dict() for j in jobs])
+            if has_filters:
+                jobs = storage.get_jobs(
+                    company=company,
+                    search_query=q,
+                    location=location,
+                    workplace_type=workplace_type,
+                    app_status=app_status,
+                    only_bookmarked=only_bookmarked,
+                    limit=limit,
+                    offset=offset
+                )
+                self._send_json([j.dict() for j in jobs])
+            else:
+                rows = _cached(_JOBS_KEY, _build_all_jobs)
+                self._send_json(rows[offset:offset + limit] if limit > 0 else [])
 
         elif path == "/api/companies":
-            companies = storage.get_companies()
-            self._send_json(companies)
+            self._send_json(_cached(_COMPANIES_KEY, storage.get_companies))
 
         elif path == "/api/stats":
-            stats = storage.get_stats()
-            self._send_json(stats)
+            self._send_json(_cached(_STATS_KEY, storage.get_stats))
 
         elif path == "/api/mass-fetch/status":
             with _mass_lock:

@@ -602,3 +602,315 @@ body {
   }
 }
 
+/* ==================== Segmented Dashed Architectural Footer ==================== */
+.segmented-footer-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  border: 1px dashed #cbd5e1;
+  background-color: #ffffff;
+  position: relative;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.segmented-footer-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 36px 32px 30px;
+  border-bottom: 1px dashed #cbd5e1;
+  gap: 24px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.segmented-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+}
+
+.segmented-footer-col {
+  padding: 32px 28px 36px;
+  border-right: 1px dashed #cbd5e1;
+  display: flex;
+  flex-direction: column;
+}
+
+.segmented-footer-col:last-child {
+  border-right: none;
+}
+
+.segmented-footer-col-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: #780115;
+}
+
+.segmented-footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  font-size: 0.84rem;
+}
+
+.segmented-footer-link {
+  color: #64748b;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
+  display: inline-block;
+}
+
+.segmented-footer-link:hover {
+  color: #780115;
+}
+
+.segmented-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  border-top: 1px dashed #cbd5e1;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: #64748b;
+  position: relative;
+}
+
+@media (max-width: 960px) {
+  .segmented-footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .segmented-footer-col:nth-child(2n) {
+    border-right: none;
+  }
+  .segmented-footer-col:nth-child(1),
+  .segmented-footer-col:nth-child(2) {
+    border-bottom: 1px dashed #cbd5e1;
+  }
+}
+
+@media (max-width: 600px) {
+  .segmented-footer-top {
+    padding: 24px 18px;
+  }
+  .segmented-footer-grid {
+    grid-template-columns: 1fr;
+  }
+  .segmented-footer-col {
+    padding: 24px 18px;
+    border-right: none;
+    border-bottom: 1px dashed #cbd5e1;
+  }
+  .segmented-footer-col:last-child {
+    border-bottom: none;
+  }
+  .segmented-footer-bottom {
+    padding: 16px 18px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* ==================== Architectural Features Showcase Section ==================== */
+.features-segmented-box {
+  border: 1px dashed #cbd5e1;
+  background-color: #ffffff;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+  margin-bottom: 56px;
+}
+
+.features-tabs-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+  border-bottom: 1px dashed #cbd5e1;
+  background-color: #ffffff;
+}
+
+.features-tab-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 12px 16px;
+  background: #ffffff;
+  border: none;
+  border-right: 1px dashed #cbd5e1;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.features-tab-cell:last-child {
+  border-right: none;
+}
+
+.features-tab-cell:hover {
+  background-color: #f8fafc;
+}
+
+.features-tab-cell.active {
+  background-color: #ffffff;
+}
+
+.features-tab-cell.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #780115;
+}
+
+.features-tab-icon-box {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  background-color: #f8fafc;
+  color: #64748b;
+  transition: all 0.15s ease;
+}
+
+.features-tab-cell:hover .features-tab-icon-box {
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.features-tab-cell.active .features-tab-icon-box {
+  background-color: #fff1f2;
+  border-color: #780115;
+  color: #780115;
+}
+
+.features-tab-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.features-tab-cell.active .features-tab-title {
+  color: #0f172a;
+}
+
+.features-tab-subtitle {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+/* Features Body */
+.features-body-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  width: 100%;
+}
+
+.features-body-left {
+  padding: 44px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.features-body-right {
+  border-left: 1px dashed #cbd5e1;
+  background-color: #fafaf9;
+  background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+  background-size: 16px 16px;
+  padding: 40px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.features-bullet-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.features-bullet-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background-color: #fff1f2;
+  border: 1.5px solid #fecdd3;
+  color: #780115;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+@media (max-width: 960px) {
+  .features-tabs-row {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+  .features-tab-cell {
+    border-bottom: 1px dashed #cbd5e1;
+  }
+  
+  .features-body-grid {
+    grid-template-columns: 1fr;
+  }
+  .features-body-right {
+    border-left: none;
+    border-top: 1px dashed #cbd5e1;
+    padding: 32px 20px;
+  }
+  .features-body-left {
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .features-body-left {
+    padding: 24px 18px;
+  }
+  .features-tab-cell {
+    padding: 14px 8px 12px;
+  }
+  .features-tab-title {
+    font-size: 0.78rem;
+  }
+  .features-tab-subtitle {
+    font-size: 0.68rem;
+  }
+}
+
+/* ==================== Dedicated Legal Page Styling ==================== */
+@media (max-width: 860px) {
+  .legal-content-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .legal-content-grid > div:first-child {
+    border-right: none !important;
+    border-bottom: 1px dashed #cbd5e1 !important;
+    padding: 28px 20px !important;
+  }
+}
+
+
+

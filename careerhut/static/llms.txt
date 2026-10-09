@@ -1,0 +1,28 @@
+# Careerhut
+> Direct Employer Career Page Engine & Verified Recruiter Discovery Platform
+
+Careerhut is an open career discovery and indexing system that crawls and aggregates live job listings directly from official company career portals (Miro, Supabase, Stripe, Figma, and custom employer domains). It bypasses third-party recruiting middlemen and ghost job boards, surfacing 100% authentic tech roles with verified recruiter emails, salary ranges, and hiring team contacts.
+
+## Core Services & Endpoints
+- [Live Job Feed](https://careerhut.org/dashboard): Interactive dual-pane split reader with sub-millisecond multi-filtering across remote status, geographic regions, tech stacks, and company tiers.
+- [Direct Portal Ingestion Engine](https://careerhut.org/api/crawl): Ingest and parse any official careers URL in real-time with automated JavaScript execution and structured job schema extraction.
+- [Recruiter Contact Intel](https://careerhut.org/dashboard?hasEmail=true): Direct hiring team contacts, talent partner inboxes, and prefilled 1-click email templates.
+- [Company Tech Catalog](https://careerhut.org/): Curated directory of tier-1 engineering organizations across AI, DevTools, Cloud, and Infrastructure.
+
+## API Documentation for AI Agents & LLMs
+- [Full LLM Context Guide](/llms-full.txt): Comprehensive deep-dive documentation of Careerhut architecture, data models, schemas, and scraping protocols.
+- [OpenAPI 3.1 Specification](/openapi.json): Standardized OpenAPI schema for interacting with the Careerhut search, filtering, and indexing engine.
+- [Robots Directive](/robots.txt): Machine access permissions and sitemap declarations.
+- [XML Sitemap](/sitemap.xml): Full URL hierarchy and content indexing manifests.
+
+## Key Capabilities
+- **Zero Middlemen**: 100% authentic jobs sourced straight from employer career domains.
+- **Direct Application URLs**: Deep links pointing directly to the employer's official application form.
+- **Recruiter Contact Extraction**: Automated extraction and verification of hiring partner emails.
+- **Rich Structured Metadata**: Salary bands, experience levels, workplace types (Remote, Hybrid, On-site), and technology taxonomy.
+- **Split-Pane Review**: Zero-lag dual-column review interface optimized for fast high-density inspection.
+
+## Legal & Compliance
+- [Privacy Policy](https://careerhut.org/privacy): User data handling, local storage privacy, and zero tracking guarantees.
+- [Terms of Service](https://careerhut.org/terms): Usage terms, direct discovery integrity, and fair use guidelines.
+- [Refund & Cancellation Policy](https://careerhut.org/refund): 100% free access guarantee for job seekers and transparent employer billing guidelines.

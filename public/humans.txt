@@ -1,0 +1,11 @@
+/* TEAM */
+  Founder & Developer: Careerhut Team
+  Contact: team@careerhut.org
+  From: Global Engineering Community
+
+/* SITE */
+  Standards: HTML5, CSS3, JavaScript ESNext, JSON-LD, OpenAPI 3.1
+  Components: React 18, Vite
+  Fonts: Plus Jakarta Sans (Google Fonts)
+  Software: Python, FastAPI, Playwright, SQLite
+  Mission: Empowering tech builders with direct career portal access and zero recruiter middlemen.

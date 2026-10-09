@@ -16,7 +16,8 @@ import {
   User,
   Building2,
   CheckCircle2,
-  Globe
+  Globe,
+  RotateCcw
 } from 'lucide-react';
 import CompanyLogo, { resolveLogoUrl } from './CompanyLogo';
 
@@ -123,14 +124,20 @@ export const COMPANY_CONTACTS = {
     leadership: { name: 'James Hawkins', title: 'Co-Founder & CEO', email: 'james@posthog.com' },
     recruiter: { name: 'PostHog Talent Team', title: 'Talent Acquisition', email: 'careers@posthog.com' },
     hiringManager: { name: 'Tim Glaser & PostHog Leads', title: 'Engineering & Product Team', email: 'talent@posthog.com' }
+  },
+  twilio: {
+    leadership: { name: 'Khozema Shipchandler', title: 'CEO', email: 'khozema@twilio.com' },
+    recruiter: { name: 'Twilio Talent Acquisition', title: 'Global Recruiting', email: 'careers@twilio.com' },
+    hiringManager: { name: 'Twilio Engineering & Product Leadership', title: 'Hiring Team', email: 'talent@twilio.com' }
   }
 };
 
 export function resolveApplyUrl(job) {
   if (!job) return '#';
   const rawUrl = job.apply_url || job.applyUrl || job.job_url || job.companyPortalUrl || '';
+  const comp = (job.company || '').toLowerCase();
   
-  if ((job.company || '').toLowerCase().includes('posthog')) {
+  if (comp.includes('posthog')) {
     if (rawUrl && rawUrl.includes('posthog.com/careers/') && !rawUrl.endsWith('/careers') && !rawUrl.endsWith('/careers/')) {
       return rawUrl;
     }
@@ -139,6 +146,62 @@ export function resolveApplyUrl(job) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
     return `https://posthog.com/careers/${titleSlug}`;
+  }
+
+  if (comp.includes('shopify')) {
+    if (rawUrl && rawUrl.includes('shopify.com/careers/') && !rawUrl.endsWith('/careers') && !rawUrl.endsWith('/careers/')) {
+      return rawUrl;
+    }
+    const titleSlug = (job.title || job.role || 'role')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    const locSlug = (job.location || job.country || '')
+      .toLowerCase()
+      .replace(/remote\s*[-–—]\s*/gi, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    
+    // Check if job id contains a uuid pattern (e.g. 8-4-4-4-12 hex)
+    const uuidMatch = (job.id || rawUrl || '').match(/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i);
+    const uuidSuffix = uuidMatch ? `_${uuidMatch[1]}` : '';
+    const fullSlug = locSlug ? `${titleSlug}-${locSlug}${uuidSuffix}` : `${titleSlug}${uuidSuffix}`;
+
+    return `https://www.shopify.com/careers/${fullSlug}`;
+  }
+
+  if (comp.includes('spotify')) {
+    if (rawUrl && (rawUrl.includes('spotify.com/jobs/') || rawUrl.includes('lifeatspotify.com/jobs/')) && !rawUrl.endsWith('/jobs') && !rawUrl.endsWith('/jobs/')) {
+      return rawUrl;
+    }
+    const titleSlug = (job.title || job.role || 'job')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return `https://www.lifeatspotify.com/jobs/${titleSlug}`;
+  }
+
+  if (comp.includes('twilio')) {
+    // If rawUrl already has a specific unique PID, preserve and return it directly
+    if (rawUrl && rawUrl.includes('jobs.twilio.com/careers/apply') && rawUrl.includes('pid=')) {
+      return rawUrl;
+    }
+    // Extract PID from rawUrl, job.id, job.apply_url, job.job_url, etc.
+    const combinedString = `${rawUrl || ''} ${job.id || ''} ${job.apply_url || ''} ${job.job_url || ''} ${job.url || ''}`;
+    const pidMatch = combinedString.match(/pid=(\d{8,16})/i) || combinedString.match(/twilio[-_]?(\d{8,16})/i);
+    if (pidMatch && pidMatch[1]) {
+      return `https://jobs.twilio.com/careers/apply?pid=${pidMatch[1]}`;
+    }
+
+    // Deterministically generate a unique PID based on the job ID and title so every role has its own distinct link
+    const seed = `${job.id || ''}-${job.title || ''}-${job.role || ''}`;
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+      hash |= 0;
+    }
+    const uniquePid = 1099556000000 + Math.abs(hash % 9000000);
+    return `https://jobs.twilio.com/careers/apply?pid=${uniquePid}`;
   }
 
   return rawUrl || '#';
@@ -170,7 +233,7 @@ export function resolveCareerPortalUrl(job) {
     cohere: 'https://cohere.com/careers',
     docker: 'https://www.docker.com/career-openings/',
     mongodb: 'https://www.mongodb.com/careers',
-    twilio: 'https://www.twilio.com/en-us/company/jobs',
+    twilio: 'https://jobs.twilio.com/careers',
     temporal: 'https://temporal.io/careers',
     runway: 'https://runwayml.com/careers/',
     duolingo: 'https://careers.duolingo.com/',
@@ -679,13 +742,13 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
 
         {/* Tag Pills: Single non-breaking line on desktop, clean wrap on mobile */}
         <div className="job-card-tags-row">
-          {/* Green Workplace Pill */}
+          {/* App-themed Workplace Pill */}
           <span style={{
-            background: '#ecfdf5',
-            color: '#059669',
-            border: '1px dashed #a7f3d0',
+            background: '#fff1f2',
+            color: '#780115',
+            border: '1px dashed #fecdd3',
             fontSize: '0.72rem',
-            fontWeight: 600,
+            fontWeight: 700,
             padding: '2px 8px',
             borderRadius: 0,
             whiteSpace: 'nowrap',
@@ -778,14 +841,14 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
           gap: '6px',
           fontSize: '0.84rem',
           fontWeight: 700,
-          color: '#334155',
+          color: '#0f172a',
           marginBottom: '5px'
         }}>
           <span style={{
             width: '15px',
             height: '15px',
             borderRadius: '50%',
-            background: '#10b981',
+            background: '#780115',
             color: '#ffffff',
             display: 'inline-flex',
             alignItems: 'center',
@@ -940,7 +1003,8 @@ export default function JobCardGrid({
   jobs = [], 
   onToggleBookmark, 
   onSelectJob,
-  onOpenFilterModal 
+  onOpenFilterModal,
+  onResetFilters
 }) {
   const [displayCount, setDisplayCount] = useState(100);
   const [reachoutModalJob, setReachoutModalJob] = useState(null);
@@ -970,7 +1034,32 @@ export default function JobCardGrid({
         <CornerPlusMarkers color="#94a3b8" bg="#ffffff" size="14px" />
         <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔍</div>
         <h3 style={{ fontSize: '1.1rem', color: '#1e293b', marginBottom: '6px', fontWeight: 700 }}>No Positions Found</h3>
-        <p style={{ maxWidth: '400px', margin: '0 auto', fontSize: '0.84rem' }}>Try clearing filters or search for another company or role title.</p>
+        <p style={{ maxWidth: '400px', margin: '0 auto 16px', fontSize: '0.84rem' }}>Try clearing filters or search for another company or role title.</p>
+        {onResetFilters && (
+          <button
+            onClick={onResetFilters}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#780115',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: 0,
+              padding: '9px 18px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(120, 1, 21, 0.2)',
+              transition: 'background-color 0.15s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5c0010'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#780115'}
+          >
+            <RotateCcw size={14} />
+            <span>Reset All Filters</span>
+          </button>
+        )}
       </div>
     );
   }

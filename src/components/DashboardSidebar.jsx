@@ -170,31 +170,22 @@ export default function DashboardSidebar({
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '10px', 
                 cursor: onGoToLanding ? 'pointer' : 'default',
                 minWidth: 0
               }}
               title={onGoToLanding ? "Back to Landing Page" : undefined}
             >
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                background: 'linear-gradient(135deg, #780115 0%, #9c0e24 100%)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                fontSize: '1rem',
-                boxShadow: '0 2px 6px rgba(120, 1, 21, 0.25)',
-                flexShrink: 0
-              }}>
-                C
-              </div>
-              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-                Careerhut
-              </div>
+              <img 
+                src="/Careerhut.png" 
+                alt="Careerhut" 
+                style={{
+                  height: '32px',
+                  width: 'auto',
+                  maxWidth: '160px',
+                  objectFit: 'contain',
+                  display: 'block'
+                }}
+              />
             </div>
 
             {isMobileDrawer ? (
@@ -304,7 +295,7 @@ export default function DashboardSidebar({
                 if (hasEmailOnly) onToggleHasEmail(false);
                 if (selectedCompany) onSelectCompany('');
               })}
-              title={effectiveCollapsed ? `All Direct Jobs (${totalJobsCount?.toLocaleString() || '680+'})` : undefined}
+              title={effectiveCollapsed ? `All Direct Jobs (${totalJobsCount?.toLocaleString() || '0'})` : undefined}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -342,7 +333,7 @@ export default function DashboardSidebar({
                   padding: '2px 7px',
                   borderRadius: 'var(--radius-full)'
                 }}>
-                  {totalJobsCount?.toLocaleString() || '680+'}
+                  {totalJobsCount?.toLocaleString() || '0'}
                 </span>
               )}
             </button>

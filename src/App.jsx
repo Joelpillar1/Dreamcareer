@@ -6,6 +6,7 @@ import JobDetailView from './components/JobDetailView';
 import FilterModal from './components/FilterModal';
 import LandingPage from './components/LandingPage';
 import JobCardGrid from './components/JobCardGrid';
+import LegalPage from './components/LegalPage';
 import { DIRECT_CAREER_JOBS } from './data/directJobs';
 import { buildLocationLists, jobGeo } from './utils/locations';
 import { resolveLogoUrl } from './components/CompanyLogo';
@@ -139,17 +140,22 @@ export function mixCompanies(jobList) {
   return mixed;
 }
 
+function resolveViewFromUrl() {
+  if (typeof window === 'undefined') return 'landing';
+  const hash = (window.location.hash || '').toLowerCase();
+  const pathname = (window.location.pathname || '').toLowerCase();
+
+  if (pathname === '/privacy' || pathname === '/privacy.html' || hash === '#privacy') return 'privacy';
+  if (pathname === '/terms' || pathname === '/terms.html' || hash === '#terms') return 'terms';
+  if (pathname === '/refund' || pathname === '/refund.html' || hash === '#refund') return 'refund';
+  if (pathname === '/dashboard' || pathname === '/jobs' || hash === '#dashboard' || hash === '#jobs') {
+    return 'dashboard';
+  }
+  return 'landing';
+}
+
 export default function App() {
-  const [currentView, setCurrentView] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const hash = window.location.hash;
-      const pathname = window.location.pathname;
-      if (hash === '#dashboard' || hash === '#jobs' || pathname === '/dashboard' || pathname === '/jobs') {
-        return 'dashboard';
-      }
-    }
-    return 'landing';
-  });
+  const [currentView, setCurrentView] = useState(() => resolveViewFromUrl());
 
   const [jobs, setJobs] = useState(() => mixCompanies(DIRECT_CAREER_JOBS));
   const [companies, setCompanies] = useState(() => computeCompaniesList(DIRECT_CAREER_JOBS));
@@ -177,15 +183,7 @@ export default function App() {
     loadAllData();
 
     const handleUrlChange = () => {
-      if (typeof window !== 'undefined') {
-        const hash = window.location.hash;
-        const pathname = window.location.pathname;
-        if (hash === '#dashboard' || hash === '#jobs' || pathname === '/dashboard' || pathname === '/jobs') {
-          setCurrentView('dashboard');
-        } else {
-          setCurrentView('landing');
-        }
-      }
+      setCurrentView(resolveViewFromUrl());
     };
 
     window.addEventListener('hashchange', handleUrlChange);
@@ -322,15 +320,30 @@ export default function App() {
         }
       }
 
-      // 3. Fallback to DIRECT_CAREER_JOBS if still empty
-      if (!rawJobs || rawJobs.length === 0) {
-        rawJobs = DIRECT_CAREER_JOBS;
+      // 3. Always merge curated DIRECT_CAREER_JOBS (Shopify, PostHog, Miro, etc.) with loaded dataset
+      const allJobsMap = new Map();
+      for (const j of DIRECT_CAREER_JOBS) {
+        if (j && (j.id || j.title)) {
+          const key = j.id || `${j.company}-${j.title}-${j.location}`;
+          allJobsMap.set(key, j);
+        }
       }
+      if (Array.isArray(rawJobs)) {
+        for (const j of rawJobs) {
+          if (j && (j.id || j.title)) {
+            const key = j.id || `${j.company}-${j.title}-${j.location}`;
+            if (!allJobsMap.has(key)) {
+              allJobsMap.set(key, j);
+            }
+          }
+        }
+      }
+      const mergedJobsList = Array.from(allJobsMap.values());
 
       // 4. Mix companies and compute indexes
-      const mixed = mixCompanies(rawJobs);
+      const mixed = mixCompanies(mergedJobsList);
       setJobs(mixed);
-      setCompanyLogos(computeCompanyLogos(rawJobs));
+      setCompanyLogos(computeCompanyLogos(mergedJobsList));
 
       if (compsData && compsData.length > 0) {
         const mergedComps = {};
@@ -342,9 +355,17 @@ export default function App() {
             mergedComps[normalized].job_count = (mergedComps[normalized].job_count || 0) + (c.job_count || 0);
           }
         }
+        // Ensure companies from DIRECT_CAREER_JOBS (like Shopify) have their full count in the list
+        for (const j of DIRECT_CAREER_JOBS) {
+          const norm = normalizeCompanyName(j.company);
+          if (norm && (!mergedComps[norm] || mergedComps[norm].job_count === 0)) {
+            const count = DIRECT_CAREER_JOBS.filter(x => normalizeCompanyName(x.company) === norm).length;
+            mergedComps[norm] = { company: norm, job_count: count };
+          }
+        }
         setCompanies(Object.values(mergedComps).sort((a, b) => (b.job_count || 0) - (a.job_count || 0)));
       } else {
-        setCompanies(computeCompaniesList(rawJobs));
+        setCompanies(computeCompaniesList(mergedJobsList));
       }
 
       setLoadError(null);
@@ -459,7 +480,7 @@ export default function App() {
     }
     setCurrentView('dashboard');
     if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', '#dashboard');
+      window.history.pushState(null, '', '/dashboard');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -467,7 +488,7 @@ export default function App() {
   const handleCrawlFromLanding = async (url) => {
     setCurrentView('dashboard');
     if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', '#dashboard');
+      window.history.pushState(null, '', '/dashboard');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     setKeyword(url);
@@ -501,7 +522,18 @@ export default function App() {
   const handleGoToLanding = () => {
     setCurrentView('landing');
     if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', '#');
+      if (window.location.hash) {
+        window.location.hash = '';
+      }
+      window.history.pushState(null, '', '/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleNavigateLegal = (type) => {
+    setCurrentView(type);
+    if (typeof window !== 'undefined') {
+      window.location.hash = `#${type}`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -568,11 +600,24 @@ export default function App() {
 
   const bookmarkedCount = jobs.filter((j) => j.is_bookmarked).length;
 
+  if (currentView === 'privacy' || currentView === 'terms' || currentView === 'refund') {
+    return (
+      <LegalPage 
+        type={currentView}
+        onNavigate={handleNavigateLegal}
+        onGoToLanding={handleGoToLanding}
+        onExploreJobs={handleExploreJobs}
+        totalJobsCount={jobs.length}
+      />
+    );
+  }
+
   if (currentView === 'landing') {
     return (
       <LandingPage 
         onExploreJobs={handleExploreJobs}
         onCrawlUrl={handleCrawlFromLanding}
+        onNavigateLegal={handleNavigateLegal}
         totalJobsCount={jobs.length}
         onSelectCompany={(comp) => {
           setCompany(comp);
@@ -777,6 +822,8 @@ export default function App() {
             isSearching={isSearching}
             activeTag={activeTag}
             onSelectTag={setActiveTag}
+            onResetFilters={handleResetFilters}
+            hasActiveFilters={Boolean(keyword || workplace || location || activeTag || company || hasEmail || onlyBookmarked)}
           />
 
           {/* Main Job Cards Grid */}
@@ -785,6 +832,7 @@ export default function App() {
             onToggleBookmark={handleToggleBookmark}
             onSelectJob={setSelectedJob}
             onOpenFilterModal={() => setFilterModalOpen(true)}
+            onResetFilters={handleResetFilters}
           />
         </main>
       </div>

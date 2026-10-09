@@ -1,0 +1,134 @@
+# Careerhut — Full System Architecture, Data Models & LLM Reference Manual
+Version: 2.4.0
+Last Updated: 2026-10-09
+Canonical Domain: https://careerhut.org
+Local Dev Port: http://localhost:5173
+
+---
+
+## 1. Executive Overview
+Careerhut is an open-access platform designed to eliminate recruiter spam, aggregate board lag, and "ghost" job postings by indexing positions directly at the source: employer career domains and Applicant Tracking Systems (ATS).
+
+By executing headless browser sessions against platforms such as Miro, Supabase, Stripe, Figma, Palantir, and bespoke career portals, Careerhut converts unstructured job descriptions into structured, normalized, machine-readable datasets.
+
+### Primary Differentiators:
+1. **Direct Ingestion vs. Aggregate Scraping**: Careerhut fetches data straight from primary sources (`company.com/careers`, `boards.greenhouse.io`, `jobs.lever.co`, `jobs.ashbyhq.com`), avoiding secondary job aggregators.
+2. **Verified Recruiter Inboxes**: Automated discovery of talent partners, hiring managers, and department inboxes to facilitate direct outreach.
+3. **High-Density Split-Pane Interface**: Instant client-side inspection of complete job specifications without browser tab proliferation.
+4. **Zero-Tracking Architecture**: Bookmarks, application pipelines, and search preferences are stored client-side in local storage.
+
+---
+
+## 2. Technical Architecture & Tech Stack
+
+### Frontend Architecture
+- **Framework**: React 18 with Vite build system
+- **Design System**: Vanilla CSS with strict CSS custom properties (`--primary: #780115`, `--sunflare: #F7B638`, `--bg-app: #ffffff`)
+- **Icons**: Lucide React
+- **Client State**: Reactive hooks, client-side indexing with sub-millisecond query evaluation across 10,000+ records.
+- **Responsiveness**: Adaptive dual-column layout on desktop, responsive drawer system on mobile.
+
+### Backend & Ingestion Engine
+- **Server**: Python FastAPI / Flask / Node.js crawler bridge (`main.py`, `crawler.py`, `sync_db.cjs`)
+- **Storage**: SQLite / JSON Flatfile (`public/data/jobs.json`, `public/data/companies.json`, `public/data/stats.json`)
+- **Scraper Engines**: Playwright / Puppeteer with stealth plugins for dynamic Single Page Application (SPA) execution.
+
+---
+
+## 3. Job Data Model & Schema Definition
+
+Every job object indexed by Careerhut adheres to the following JSON schema:
+
+```json
+{
+  "id": "string (unique identifier or URL slug)",
+  "title": "string (standardized job title)",
+  "role": "string (clean normalized role name)",
+  "company": "string (official organization name)",
+  "location": "string (formatted geographic string)",
+  "workplace_type": "Remote | Hybrid | On-Site",
+  "url": "string (canonical application URL)",
+  "contact_email": "string | null (verified recruiter email address)",
+  "salary": "string | null (e.g., '$180,000 - $240,000 USD')",
+  "experience_level": "string | null (e.g., 'Senior', 'Staff', 'Entry')",
+  "description": "string (full Markdown or HTML job description)",
+  "about": "string (concise 1-2 sentence executive summary)",
+  "skills": ["string (array of relevant technologies and competencies)"],
+  "tags": ["string (category tags: Frontend, Backend, AI, Remote, etc.)"],
+  "requirements": ["string (key qualification bullet points)"],
+  "responsibilities": ["string (core role expectations)"],
+  "discovered_at": "string (ISO-8601 timestamp)",
+  "is_bookmarked": "boolean (user bookmark state)"
+}
+```
+
+---
+
+## 4. API Endpoints & Interfaces
+
+### 1. `GET /data/jobs.json`
+Returns the static snapshot of all active verified job openings indexed across all partner companies.
+
+### 2. `GET /data/companies.json`
+Returns the directory of companies, active vacancy counts, logo URLs, and category tags.
+
+### 3. `POST /api/crawl`
+Initiates a real-time extraction task against a target company careers page.
+**Request Body**:
+```json
+{
+  "url": "https://company.com/careers"
+}
+```
+**Response**:
+```json
+{
+  "status": "success",
+  "extracted_count": 24,
+  "jobs": [...]
+}
+```
+
+---
+
+## 5. SEO, GEO & AEO Strategy
+
+Careerhut implements modern Search Engine Optimization (SEO), Generative Engine Optimization (GEO), and Artificial Intelligence Answer Engine Optimization (AEO):
+
+- **Structured Data**: JSON-LD schemas for `WebSite`, `Organization`, `WebApplication`, and `JobPosting` embedded in `index.html`.
+- **LLM Discovery**: Machine-readable directives via `/llms.txt`, `/llms-full.txt`, and `/robots.txt`.
+- **Semantic HTML**: Fully accessible heading hierarchy (`h1`, `h2`, `h3`), ARIA labels, and keyboard-navigable components.
+- **Canonical URLs**: Clear canonical mapping preventing duplicate indexation.
+
+---
+
+## 6. Privacy Policy Summary
+
+- **No Third-Party Trackers**: Careerhut operates without tracking cookies, Google Analytics beacons, or fingerprinting scripts.
+- **Local State Retention**: Bookmarks, applied application statuses, and search filters are stored in the user's browser `localStorage`.
+- **Public Data Integrity**: All job listings and contact emails are parsed strictly from publicly accessible company career portals.
+- **Data Subject Rights**: Users and employers may request listing removals or updates by contacting `support@careerhut.org`.
+
+---
+
+## 7. Terms of Service Summary
+
+- **Permitted Use**: Personal career discovery, application research, and direct hiring inquiries.
+- **Prohibited Conduct**: Automated malicious scraping, abusive high-frequency spamming of recruiter inboxes, or reverse-engineering protected services.
+- **Disclaimer**: Careerhut indexes public listings provided directly by employers and does not guarantee interview outcomes or employment offers.
+
+---
+
+## 8. Refund & Cancellation Policy Summary
+
+- **100% Free for Job Seekers**: No fees, paywalls, or subscriptions are ever charged for candidate access, search, bookmarks, or outreach.
+- **Employer Sponsorships**: 14-day refund window for unrendered promotional placements and pro-rated credits for technical non-delivery.
+- **Support Inquiries**: `billing@careerhut.org` / `team@careerhut.org`.
+
+---
+
+## 9. Contact & Maintenance
+- **Platform URL**: https://careerhut.org
+- **Developer Documentation**: https://careerhut.org/llms.txt
+- **OpenAPI Schema**: https://careerhut.org/openapi.json
+- **Inquiries**: team@careerhut.org

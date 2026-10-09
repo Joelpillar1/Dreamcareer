@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Briefcase, MapPin, SlidersHorizontal, ArrowRight, Sparkles, Globe } from 'lucide-react';
+import { Search, Briefcase, MapPin, SlidersHorizontal, ArrowRight, Sparkles, Globe, RotateCcw } from 'lucide-react';
 
 const POPULAR_TAGS = [
   'Frontend',
@@ -33,7 +33,9 @@ export default function SearchControlBar({
   onSearchOrCrawl,
   isSearching,
   activeTag,
-  onSelectTag
+  onSelectTag,
+  onResetFilters,
+  hasActiveFilters
 }) {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -210,6 +212,45 @@ export default function SearchControlBar({
             </>
           )}
         </button>
+
+        {/* Reset Button */}
+        {onResetFilters && (
+          <button
+            type="button"
+            onClick={onResetFilters}
+            title="Reset search and all filters"
+            className="search-reset-btn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              backgroundColor: '#ffffff',
+              color: '#64748b',
+              border: '1px dashed #cbd5e1',
+              borderRadius: 0,
+              padding: '9px 14px',
+              fontSize: '0.86rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc';
+              e.currentTarget.style.borderColor = '#780115';
+              e.currentTarget.style.color = '#780115';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#ffffff';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+              e.currentTarget.style.color = '#64748b';
+            }}
+          >
+            <RotateCcw size={14} />
+            <span>Reset</span>
+          </button>
+        )}
       </div>
 
       {/* Quick Tag Pills (Subtle, clean row) */}

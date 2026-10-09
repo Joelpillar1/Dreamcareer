@@ -35,28 +35,18 @@ export default function Navbar({ status, onOpenBatch }) {
       marginBottom: '32px',
       boxShadow: 'var(--shadow-sm)'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          background: 'var(--primary)',
-          borderRadius: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#fff',
-          boxShadow: 'var(--shadow-sm)'
-        }}>
-          <Layers size={22} />
-        </div>
-        <div>
-          <div style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
-            Career<span style={{ color: 'var(--primary)' }}>hut</span>
-          </div>
-          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--accent-cyan)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Direct Career Page Engine
-          </div>
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <img 
+          src="/Careerhut.png" 
+          alt="Careerhut" 
+          style={{
+            height: '36px',
+            width: 'auto',
+            maxWidth: '180px',
+            objectFit: 'contain',
+            display: 'block'
+          }} 
+        />
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

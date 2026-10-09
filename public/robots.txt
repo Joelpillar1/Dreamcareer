@@ -1,0 +1,63 @@
+# robots.txt for Careerhut
+# Careerhut - Direct Employer Career Page Engine & Recruiter Discovery Platform
+# Optimization: Full access for web search engines, Generative Engine Optimization (GEO), Artificial Intelligence Search Optimization (AEO), and LLM agents.
+
+User-agent: *
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /sitemap.xml
+Allow: /openapi.json
+Allow: /data/companies.json
+Allow: /data/stats.json
+Disallow: /api/private/
+
+# Explicit permissions for LLM and AI Crawlers (AEO / GEO Optimization)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Cohere-ai
+Allow: /
+
+User-agent: Diffbot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Sitemaps & Context Feeds
+Sitemap: https://careerhut.org/sitemap.xml
+Sitemap: http://localhost:5173/sitemap.xml
