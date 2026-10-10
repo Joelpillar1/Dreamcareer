@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search, Briefcase, MapPin, SlidersHorizontal, ArrowRight, Sparkles, Globe, RotateCcw } from 'lucide-react';
+import { Search, Briefcase, MapPin, SlidersHorizontal, ArrowRight, Sparkles, Globe, RotateCcw, Building2 } from 'lucide-react';
+import CustomDropdown from './CustomDropdown';
 
 const POPULAR_TAGS = [
   'Frontend',
@@ -26,6 +27,12 @@ function CornerPlusMarkers({ color = '#94a3b8', bg = '#ffffff', size = '13px' })
 export default function SearchControlBar({
   keyword,
   onKeywordChange,
+  companies = [],
+  selectedCompany = '',
+  onCompanyChange = () => {},
+  regions = [],
+  selectedRegion = '',
+  onRegionChange = () => {},
   workplace,
   onWorkplaceChange,
   location,
@@ -79,7 +86,7 @@ export default function SearchControlBar({
         <div 
           className="search-main-input-wrap"
           style={{
-            flex: '1 1 280px',
+            flex: '1 1 240px',
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
@@ -109,11 +116,47 @@ export default function SearchControlBar({
           />
         </div>
 
+        {/* Custom Company Dropdown */}
+        <CustomDropdown
+          options={companies.map((c) => ({
+            value: c.company,
+            label: c.company,
+            count: c.job_count,
+            logoUrl: c.company_logo || null
+          }))}
+          value={selectedCompany || ''}
+          onChange={onCompanyChange}
+          placeholder={`All Companies ${companies.length ? `(${companies.length})` : ''}`}
+          searchPlaceholder="Search companies..."
+          triggerIcon={Building2}
+          variant="command"
+          className="search-company-dropdown-wrap"
+          style={{ flex: '0 1 180px', minWidth: '150px' }}
+        />
+
+        {/* Custom Region Dropdown */}
+        <CustomDropdown
+          options={regions.map((r) => ({
+            value: r.value || r.label,
+            label: r.label,
+            count: r.count,
+            icon: r.icon
+          }))}
+          value={selectedRegion || ''}
+          onChange={onRegionChange}
+          placeholder={`All Regions ${regions.length ? `(${regions.length})` : ''}`}
+          searchPlaceholder="Search regions..."
+          triggerIcon={Globe}
+          variant="command"
+          className="search-region-dropdown-wrap"
+          style={{ flex: '0 1 170px', minWidth: '145px' }}
+        />
+
         {/* Location Input (Compact) */}
         <div 
           className="search-location-input-wrap"
           style={{
-            flex: '0 1 180px',
+            flex: '0 1 170px',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
@@ -129,7 +172,7 @@ export default function SearchControlBar({
             value={location}
             onChange={(e) => onLocationChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Any location..."
+            placeholder="Any city or state..."
             style={{
               width: '100%',
               background: 'transparent',

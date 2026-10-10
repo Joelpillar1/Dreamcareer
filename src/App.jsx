@@ -51,7 +51,7 @@ function computeCompaniesList(jobList) {
 
 export function getJobTimestamp(job) {
   if (!job) return 0;
-  const raw = job.discovered_at || job.posted_date || job.postedDate || job.created_at || '';
+  const raw = job.posted_date || job.postedDate || job.date_posted || job.created_at || job.discovered_at || '';
   if (!raw) return 0;
   const parsed = Date.parse(raw);
   if (!isNaN(parsed)) return parsed;
@@ -171,6 +171,7 @@ export default function App() {
   const [keyword, setKeyword] = useState('');
   const [workplace, setWorkplace] = useState('');
   const [location, setLocation] = useState('');
+  const [region, setRegion] = useState('');
   const [company, setCompany] = useState('');
   const [hasEmail, setHasEmail] = useState(false);
   const [onlyBookmarked, setOnlyBookmarked] = useState(false);
@@ -462,6 +463,7 @@ export default function App() {
     setKeyword('');
     setWorkplace('');
     setLocation('');
+    setRegion('');
     setCompany('');
     setHasEmail(false);
     setOnlyBookmarked(false);
@@ -558,8 +560,9 @@ export default function App() {
   const filteredJobs = useMemo(() => {
     const searchTarget = (keyword || activeTag).toLowerCase().trim();
     const locationTarget = (location || '').toLowerCase().trim();
+    const regionTarget = (region || '').toLowerCase().trim();
 
-    return jobs.filter((job) => {
+    const filtered = jobs.filter((job) => {
       const titleStr = (job.title || job.role || '').toLowerCase();
       const descStr = (job.description || job.about || '').toLowerCase();
       const deptStr = (job.department || '').toLowerCase();
@@ -583,12 +586,16 @@ export default function App() {
         (geo && (geo.countries.includes(locationTarget) || geo.regions.includes(locationTarget))) ||
         locStr.includes(locationTarget) ||
         countryStr.includes(locationTarget);
+      const matchRegion = !regionTarget ||
+        (geo && geo.regions.some((r) => r.toLowerCase() === regionTarget || r.toLowerCase().includes(regionTarget))) ||
+        locStr.includes(regionTarget) ||
+        countryStr.includes(regionTarget);
       const matchCompany = !company || job.company === company;
       const email = job.contact_email || job.recruiterEmail;
       const matchEmail = !hasEmail || (email && email.length > 0);
       const matchBookmark = !onlyBookmarked || job.is_bookmarked;
 
-      return matchSearch && matchWorkplace && matchLocation && matchCompany && matchEmail && matchBookmark;
+      return matchSearch && matchWorkplace && matchLocation && matchRegion && matchCompany && matchEmail && matchBookmark;
     });
 
     if (company) {
@@ -596,7 +603,7 @@ export default function App() {
     }
 
     return mixCompanies(filtered);
-  }, [jobs, keyword, activeTag, workplace, location, locationIndex, company, hasEmail, onlyBookmarked]);
+  }, [jobs, keyword, activeTag, workplace, location, region, locationIndex, company, hasEmail, onlyBookmarked]);
 
   const bookmarkedCount = jobs.filter((j) => j.is_bookmarked).length;
 
@@ -642,6 +649,8 @@ export default function App() {
           companyLogos={companyLogos}
           selectedCompany={company}
           onSelectCompany={setCompany}
+          selectedRegion={region}
+          onSelectRegion={setRegion}
           selectedWorkplace={workplace}
           onSelectWorkplace={setWorkplace}
           selectedLocation={location}
@@ -675,6 +684,8 @@ export default function App() {
             companyLogos={companyLogos}
             selectedCompany={company}
             onSelectCompany={setCompany}
+            selectedRegion={region}
+            onSelectRegion={setRegion}
             selectedWorkplace={workplace}
             onSelectWorkplace={setWorkplace}
             selectedLocation={location}
@@ -814,6 +825,12 @@ export default function App() {
           <SearchControlBar 
             keyword={keyword}
             onKeywordChange={setKeyword}
+            companies={companies}
+            selectedCompany={company}
+            onCompanyChange={setCompany}
+            regions={locationLists.regions}
+            selectedRegion={region}
+            onRegionChange={setRegion}
             workplace={workplace}
             onWorkplaceChange={setWorkplace}
             location={location}
@@ -823,7 +840,7 @@ export default function App() {
             activeTag={activeTag}
             onSelectTag={setActiveTag}
             onResetFilters={handleResetFilters}
-            hasActiveFilters={Boolean(keyword || workplace || location || activeTag || company || hasEmail || onlyBookmarked)}
+            hasActiveFilters={Boolean(keyword || workplace || location || region || activeTag || company || hasEmail || onlyBookmarked)}
           />
 
           {/* Main Job Cards Grid */}
@@ -844,6 +861,9 @@ export default function App() {
         companies={companies}
         selectedCompany={company}
         onSelectCompany={setCompany}
+        regions={locationLists.regions}
+        selectedRegion={region}
+        onSelectRegion={setRegion}
         selectedWorkplace={workplace}
         onSelectWorkplace={setWorkplace}
         hasEmailOnly={hasEmail}

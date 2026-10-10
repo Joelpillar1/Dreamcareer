@@ -39,8 +39,15 @@ def export_data(db_path='careerhut_jobs.db', output_dir='public/data'):
                responsibilities, requirements, benefits, 
                SUBSTR(description, 1, 1200) as description 
         FROM jobs 
-        ORDER BY discovered_at DESC
+        ORDER BY 
+            CASE 
+                WHEN posted_date GLOB '[0-9][0-9][0-9][0-9]*' THEN posted_date 
+                ELSE '1970-01-01' 
+            END DESC,
+            discovered_at DESC
     ''')
+
+
     rows = cursor.fetchall()
     jobs = []
     for r in rows:

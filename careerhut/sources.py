@@ -42,7 +42,7 @@ SEED_COMPANIES: List[Dict[str, Any]] = [
     {"name": "Plaid", "url": "https://plaid.com/careers/"},
     {"name": "Brex", "url": "https://www.brex.com/careers"},
     {"name": "Mercury", "url": "https://mercury.com/jobs"},
-    {"name": "Gusto", "url": "https://gusto.com/about/careers"},
+    {"name": "Gusto", "url": "https://gusto.com/about/careers", "ats": ("greenhouse", "gusto")},
     {"name": "Affirm", "url": "https://www.affirm.com/careers"},
     {"name": "Chime", "url": "https://careers.chime.com"},
     {"name": "Instacart", "url": "https://instacart.careers"},
@@ -107,6 +107,53 @@ SEED_COMPANIES: List[Dict[str, Any]] = [
     {"name": "Palantir", "url": "https://www.palantir.com/careers/"},
     {"name": "Docusign", "url": "https://careers.docusign.com"},
     {"name": "Okta", "url": "https://www.okta.com/company/careers/job-listing/"},
+    # --- Category 1: Software Engineering & Development ---
+    {"name": "Modal", "url": "https://modal.com/careers", "ats": ("ashby", "modal")},
+    {"name": "Railway", "url": "https://railway.com/careers", "ats": ("ashby", "railway")},
+    {"name": "Together AI", "url": "https://www.together.ai/careers", "ats": ("greenhouse", "togetherai")},
+    {"name": "Anyscale", "url": "https://www.anyscale.com/careers", "ats": ("ashby", "anyscale")},
+    {"name": "Baseten", "url": "https://www.baseten.co/careers", "ats": ("ashby", "baseten")},
+    {"name": "CoreWeave", "url": "https://www.coreweave.com/careers", "ats": ("greenhouse", "coreweave")},
+    {"name": "Neo4j", "url": "https://neo4j.com/careers", "ats": ("greenhouse", "neo4j")},
+    {"name": "n8n", "url": "https://n8n.io/careers", "ats": ("ashby", "n8n")},
+    {"name": "ClickUp", "url": "https://clickup.com/careers", "ats": ("ashby", "clickup")},
+    # --- Category 2: Product, UI/UX & Design ---
+    {"name": "tldraw", "url": "https://tldraw.com/careers", "ats": ("ashby", "tldraw")},
+    {"name": "Atlan", "url": "https://atlan.com/careers", "ats": ("ashby", "atlan")},
+    # --- Category 3: Data, AI & Machine Learning ---
+    {"name": "Pinecone", "url": "https://www.pinecone.io/careers", "ats": ("ashby", "pinecone")},
+    {"name": "Weaviate", "url": "https://weaviate.io/company/careers", "ats": ("ashby", "weaviate")},
+    # --- Category 4: Cybersecurity & IT ---
+    {"name": "1Password", "url": "https://1password.com/company/careers", "ats": ("ashby", "1password")},
+    {"name": "Huntress", "url": "https://www.huntress.com/careers", "ats": ("greenhouse", "huntress")},
+    {"name": "Dragos", "url": "https://www.dragos.com/careers", "ats": ("greenhouse", "dragos")},
+    {"name": "Axonius", "url": "https://www.axonius.com/careers", "ats": ("greenhouse", "axonius")},
+    {"name": "Expel", "url": "https://expel.com/careers", "ats": ("greenhouse", "expel")},
+    # --- Category 5: Product Management & Operations ---
+    {"name": "Orchard", "url": "https://www.orchard.com/careers", "ats": ("greenhouse", "orchard")},
+    # --- Category 6: Sales, Marketing & Customer Support ---
+    {"name": "Salesloft", "url": "https://salesloft.com/careers", "ats": ("greenhouse", "salesloft")},
+    {"name": "Attentive", "url": "https://attentive.com/careers", "ats": ("greenhouse", "attentive")},
+    {"name": "Brandwatch", "url": "https://www.brandwatch.com/careers/", "ats": ("greenhouse", "brandwatch")},
+    # --- Category 7: Healthcare & Allied Health ---
+    {"name": "Oscar Health", "url": "https://www.hioscar.com/careers", "ats": ("greenhouse", "oscar")},
+    {"name": "One Medical", "url": "https://www.onemedical.com/careers", "ats": ("greenhouse", "onemedical")},
+    {"name": "Commure", "url": "https://commure.com/careers", "ats": ("ashby", "commure")},
+    {"name": "Included Health", "url": "https://includedhealth.com/careers", "ats": ("lever", "includedhealth")},
+    # --- Category 8: Engineering, Energy & Skilled Trades ---
+    {"name": "Formlabs", "url": "https://formlabs.com/careers", "ats": ("greenhouse", "formlabs")},
+    {"name": "Fictiv", "url": "https://www.fictiv.com/careers", "ats": ("greenhouse", "fictiv")},
+    {"name": "Span", "url": "https://www.span.io/careers", "ats": ("ashby", "span")},
+    # --- Category 9: Finance, Accounting & Compliance ---
+    {"name": "Melio", "url": "https://melio.com/careers", "ats": ("greenhouse", "melio")},
+    {"name": "Candid", "url": "https://www.candidapp.com/careers", "ats": ("greenhouse", "candid")},
+    {"name": "Mosaic", "url": "https://www.mosaicapp.com/careers", "ats": ("ashby", "mosaic")},
+    {"name": "Sequence", "url": "https://www.sequencehq.com/careers", "ats": ("ashby", "sequence")},
+    {"name": "Baselayer", "url": "https://www.baselayer.com/careers", "ats": ("greenhouse", "baselayer")},
+    {"name": "Compound", "url": "https://compound.finance/careers", "ats": ("ashby", "compound")},
+    {"name": "Complete", "url": "https://getcomplete.com/careers", "ats": ("ashby", "complete")},
+    # --- Category 10: HR, Recruitment & People Operations ---
+    {"name": "Culture Amp", "url": "https://www.cultureamp.com/careers", "ats": ("greenhouse", "cultureamp")},
 ]
 
 # ---------------------------------------------------------------------------

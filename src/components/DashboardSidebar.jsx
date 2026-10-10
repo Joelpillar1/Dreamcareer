@@ -16,9 +16,13 @@ import {
   Bell,
   PanelLeftClose,
   PanelLeftOpen,
-  X
+  X,
+  Building2,
+  Globe,
+  MapPin
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
+import CustomDropdown from './CustomDropdown';
 
 const COMPANY_COLORS = {
   amazon: { bg: '#fff7ed', text: '#ea580c', letter: 'a' },
@@ -71,6 +75,8 @@ export default function DashboardSidebar({
   companyLogos = {},
   selectedCompany,
   onSelectCompany,
+  selectedRegion,
+  onSelectRegion = () => {},
   selectedWorkplace,
   onSelectWorkplace,
   selectedLocation,
@@ -456,274 +462,165 @@ export default function DashboardSidebar({
           </div>
         </div>
 
-        {/* Section 2: Direct Company Portals */}
-        <div>
+        {/* Section 2: Direct Company Portals Dropdown */}
+        <div style={{ padding: effectiveCollapsed ? '0' : '0 4px', marginBottom: '14px' }}>
           {!effectiveCollapsed ? (
-            <div style={{
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              color: 'var(--text-subtle)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              paddingLeft: '8px',
-              marginBottom: '6px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <span>Company Portals</span>
-              <span style={{ fontSize: '0.68rem', color: 'var(--text-subtle)' }}>({companies.length})</span>
-            </div>
+            <>
+              <div style={{
+                ...SECTION_LABEL_STYLE,
+                paddingLeft: '2px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '6px'
+              }}>
+                <span>Company</span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-subtle)' }}>({companies.length})</span>
+              </div>
+
+              <CustomDropdown
+                options={companies.map((c) => ({
+                  value: c.company,
+                  label: c.company,
+                  count: c.job_count,
+                  logoUrl: companyLogos[c.company] || c.company_logo || null
+                }))}
+                value={selectedCompany || ''}
+                onChange={(val) => handleItemClick(() => onSelectCompany(val))}
+                placeholder={`All Companies (${companies.length})`}
+                searchPlaceholder="Search companies..."
+                triggerIcon={Building2}
+                variant="sidebar"
+              />
+            </>
           ) : (
-            <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0 8px' }} />
+            <button
+              onClick={toggleCollapsed}
+              title={selectedCompany ? `Company: ${selectedCompany}` : "Filter by Company"}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '32px',
+                margin: '0 auto',
+                borderRadius: 'var(--radius-sm)',
+                background: selectedCompany ? 'var(--primary-light)' : 'transparent',
+                border: selectedCompany ? '1px solid var(--primary)' : '1px solid transparent',
+                cursor: 'pointer',
+                transition: 'var(--transition)'
+              }}
+            >
+              <Building2 size={16} color={selectedCompany ? 'var(--primary)' : 'var(--text-subtle)'} />
+            </button>
           )}
-
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: effectiveCollapsed ? '6px' : '2px',
-            maxHeight: effectiveCollapsed ? '280px' : '320px',
-            overflowY: 'auto',
-            paddingRight: '2px',
-            alignItems: effectiveCollapsed ? 'center' : 'stretch'
-          }}>
-            {companies.map((c) => {
-              const isSelected = selectedCompany === c.company;
-              const logoUrl = companyLogos[c.company] || c.company_logo || null;
-
-              if (effectiveCollapsed) {
-                return (
-                  <button
-                    key={c.company}
-                    onClick={() => handleItemClick(() => onSelectCompany(isSelected ? '' : c.company))}
-                    title={`${c.company} (${c.job_count} roles)`}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '6px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: isSelected ? 'var(--primary-light)' : 'transparent',
-                      border: isSelected ? '1px solid var(--primary)' : '1px solid transparent',
-                      cursor: 'pointer',
-                      transition: 'var(--transition)'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = 'transparent';
-                    }}
-                  >
-                    <CompanyLogo src={logoUrl} name={c.company} size={24} radius={6} />
-                  </button>
-                );
-              }
-
-              return (
-                <button
-                  key={c.company}
-                  onClick={() => handleItemClick(() => onSelectCompany(isSelected ? '' : c.company))}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '6px 10px',
-                    borderRadius: 'var(--radius-sm)',
-                    background: isSelected ? 'var(--primary-light)' : 'transparent',
-                    color: isSelected ? 'var(--primary-text)' : 'var(--text-main)',
-                    fontWeight: isSelected ? 700 : 500,
-                    fontSize: '0.82rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'var(--transition)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                    <CompanyLogo src={logoUrl} name={c.company} size={20} radius={4} />
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {c.company}
-                    </span>
-                  </div>
-                  <span style={{
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                    color: isSelected ? 'var(--primary-text)' : 'var(--text-subtle)'
-                  }}>
-                    {c.job_count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
-        {/* Section 3: Locations */}
-        <div>
+        {/* Section 3: Region Dropdown */}
+        <div style={{ padding: effectiveCollapsed ? '0' : '0 4px', marginBottom: '14px' }}>
           {!effectiveCollapsed ? (
-            <div style={SECTION_LABEL_STYLE}>
-              Countries
-            </div>
-          ) : (
-            <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0 8px' }} />
-          )}
-
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: effectiveCollapsed ? '6px' : '2px',
-            maxHeight: effectiveCollapsed ? '240px' : '320px',
-            overflowY: 'auto',
-            paddingRight: '2px',
-            alignItems: effectiveCollapsed ? 'center' : 'stretch'
-          }}>
-            {locationItems.map((item) => {
-              const isSelected = selectedLocation === item.value;
-
-              if (effectiveCollapsed) {
-                return (
-                  <button
-                    key={item.value || item.label}
-                    title={item.count != null ? `${item.label} (${item.count})` : item.label}
-                    onClick={() => handleItemClick(() => onSelectLocation(isSelected ? '' : item.value))}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '36px',
-                      height: '32px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: isSelected ? 'var(--primary-light)' : 'transparent',
-                      border: isSelected ? '1px solid var(--primary)' : '1px solid transparent',
-                      cursor: 'pointer',
-                      fontSize: '1rem',
-                      transition: 'var(--transition)'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = 'transparent';
-                    }}
-                  >
-                    <span>{item.icon}</span>
-                  </button>
-                );
-              }
-
-              return (
-                <button
-                  key={item.value || item.label}
-                  title={item.count != null ? `${item.count} roles in ${item.label}` : item.label}
-                  onClick={() => handleItemClick(() => onSelectLocation(isSelected ? '' : item.value))}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '6px 10px',
-                    borderRadius: 'var(--radius-sm)',
-                    background: isSelected ? 'var(--primary-light)' : 'transparent',
-                    color: isSelected ? 'var(--primary-text)' : 'var(--text-main)',
-                    fontWeight: isSelected ? 700 : 500,
-                    fontSize: '0.82rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'var(--transition)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                    <span>{item.icon}</span>
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {item.label}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {item.count != null && (
-                      <span style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 600,
-                        color: isSelected ? 'var(--primary-text)' : 'var(--text-subtle)'
-                      }}>
-                        {item.count}
-                      </span>
-                    )}
-                    {isSelected && <CheckCircle2 size={13} color="var(--primary)" />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {!effectiveCollapsed && regions.length > 0 && (
-            <div style={{ marginTop: '14px' }}>
-              <div style={SECTION_LABEL_STYLE}>Regions</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                {regions.map((item) => {
-                  const isSelected = selectedLocation === item.value;
-                  return (
-                    <button
-                      key={item.value || item.label}
-                      title={item.count != null ? `${item.count} roles in ${item.label}` : item.label}
-                      onClick={() => handleItemClick(() => onSelectLocation(isSelected ? '' : item.value))}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '6px 10px',
-                        borderRadius: 'var(--radius-sm)',
-                        background: isSelected ? 'var(--primary-light)' : 'transparent',
-                        color: isSelected ? 'var(--primary-text)' : 'var(--text-main)',
-                        fontWeight: isSelected ? 700 : 500,
-                        fontSize: '0.82rem',
-                        border: 'none',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        transition: 'var(--transition)'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isSelected) e.currentTarget.style.background = 'var(--bg-secondary)';
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isSelected) e.currentTarget.style.background = 'transparent';
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                        <span>{item.icon}</span>
-                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {item.label}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {item.count != null && (
-                          <span style={{
-                            fontSize: '0.7rem',
-                            fontWeight: 600,
-                            color: isSelected ? 'var(--primary-text)' : 'var(--text-subtle)'
-                          }}>
-                            {item.count}
-                          </span>
-                        )}
-                        {isSelected && <CheckCircle2 size={13} color="var(--primary)" />}
-                      </div>
-                    </button>
-                  );
-                })}
+            <>
+              <div style={{
+                ...SECTION_LABEL_STYLE,
+                paddingLeft: '2px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '6px'
+              }}>
+                <span>Region</span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-subtle)' }}>({regions.length})</span>
               </div>
-            </div>
+
+              <CustomDropdown
+                options={regions.map((item) => ({
+                  value: item.value || item.label,
+                  label: item.label,
+                  count: item.count,
+                  icon: item.icon
+                }))}
+                value={selectedRegion || ''}
+                onChange={(val) => handleItemClick(() => onSelectRegion(val))}
+                placeholder={`All Regions (${regions.length})`}
+                searchPlaceholder="Search regions..."
+                triggerIcon={Globe}
+                variant="sidebar"
+              />
+            </>
+          ) : (
+            <button
+              onClick={toggleCollapsed}
+              title={selectedRegion ? `Region: ${selectedRegion}` : "Filter by Region"}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '32px',
+                margin: '0 auto',
+                borderRadius: 'var(--radius-sm)',
+                background: selectedRegion ? 'var(--primary-light)' : 'transparent',
+                border: selectedRegion ? '1px solid var(--primary)' : '1px solid transparent',
+                cursor: 'pointer',
+                transition: 'var(--transition)'
+              }}
+            >
+              <Globe size={16} color={selectedRegion ? 'var(--primary)' : 'var(--text-subtle)'} />
+            </button>
+          )}
+        </div>
+
+        {/* Section 4: Country Dropdown */}
+        <div style={{ padding: effectiveCollapsed ? '0' : '0 4px', marginBottom: '14px' }}>
+          {!effectiveCollapsed ? (
+            <>
+              <div style={{
+                ...SECTION_LABEL_STYLE,
+                paddingLeft: '2px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '6px'
+              }}>
+                <span>Country</span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-subtle)' }}>({countries.length})</span>
+              </div>
+
+              <CustomDropdown
+                options={countries.map((item) => ({
+                  value: item.value || item.label,
+                  label: item.label,
+                  count: item.count,
+                  icon: item.icon
+                }))}
+                value={selectedLocation || ''}
+                onChange={(val) => handleItemClick(() => onSelectLocation(val))}
+                placeholder={`All Countries (${countries.length})`}
+                searchPlaceholder="Search countries..."
+                triggerIcon={MapPin}
+                variant="sidebar"
+              />
+            </>
+          ) : (
+            <button
+              onClick={toggleCollapsed}
+              title={selectedLocation ? `Country: ${selectedLocation}` : "Filter by Country"}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '32px',
+                margin: '0 auto',
+                borderRadius: 'var(--radius-sm)',
+                background: selectedLocation ? 'var(--primary-light)' : 'transparent',
+                border: selectedLocation ? '1px solid var(--primary)' : '1px solid transparent',
+                cursor: 'pointer',
+                transition: 'var(--transition)'
+              }}
+            >
+              <MapPin size={16} color={selectedLocation ? 'var(--primary)' : 'var(--text-subtle)'} />
+            </button>
           )}
         </div>
       </div>

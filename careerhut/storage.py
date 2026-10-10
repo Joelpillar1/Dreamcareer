@@ -405,9 +405,16 @@ class JobStorage:
                 search_param = f"%{search_query}%"
                 params.extend([search_param, search_param, search_param, search_param])
 
-            # Secondary key keeps pagination stable (no skipped/duplicated rows).
-            query += " ORDER BY discovered_at DESC, id ASC LIMIT ? OFFSET ?"
+            # Prioritize genuine ISO posted_date over fallback discovered_at, filtering out non-date labels
+            query += """ ORDER BY 
+                CASE 
+                    WHEN posted_date GLOB '[0-9][0-9][0-9][0-9]*' THEN posted_date 
+                    ELSE '1970-01-01' 
+                END DESC,
+                discovered_at DESC, id ASC LIMIT ? OFFSET ?"""
             params.extend([limit, offset])
+
+
 
             cursor.execute(query, params)
             rows = cursor.fetchall()

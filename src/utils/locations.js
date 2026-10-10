@@ -303,6 +303,121 @@ export function regionsFromLocation(location) {
  */
 const REMOTE_GLOBAL = 'remote / global';
 
+export const COUNTRY_TO_REGIONS = {
+  // North America
+  'United States': ['north america'],
+  'Canada': ['north america'],
+  'Mexico': ['latin america', 'north america'],
+
+  // Latin America
+  'Brazil': ['latin america'],
+  'Argentina': ['latin america'],
+  'Chile': ['latin america'],
+  'Colombia': ['latin america'],
+  'Costa Rica': ['latin america'],
+  'Peru': ['latin america'],
+  'Uruguay': ['latin america'],
+  'Dominican Republic': ['latin america'],
+  'Guatemala': ['latin america'],
+  'Panama': ['latin america'],
+  'Ecuador': ['latin america'],
+  'Bolivia': ['latin america'],
+  'Paraguay': ['latin america'],
+
+  // Europe & EMEA
+  'United Kingdom': ['europe', 'emea'],
+  'Ireland': ['europe', 'emea'],
+  'Germany': ['europe', 'emea'],
+  'France': ['europe', 'emea'],
+  'Netherlands': ['europe', 'emea'],
+  'Spain': ['europe', 'emea'],
+  'Portugal': ['europe', 'emea'],
+  'Poland': ['europe', 'emea'],
+  'Switzerland': ['europe', 'emea'],
+  'Sweden': ['europe', 'emea'],
+  'Norway': ['europe', 'emea'],
+  'Denmark': ['europe', 'emea'],
+  'Finland': ['europe', 'emea'],
+  'Italy': ['europe', 'emea'],
+  'Belgium': ['europe', 'emea'],
+  'Austria': ['europe', 'emea'],
+  'Czechia': ['europe', 'emea'],
+  'Romania': ['europe', 'emea'],
+  'Bulgaria': ['europe', 'emea'],
+  'Hungary': ['europe', 'emea'],
+  'Greece': ['europe', 'emea'],
+  'Serbia': ['europe', 'emea'],
+  'Croatia': ['europe', 'emea'],
+  'Slovenia': ['europe', 'emea'],
+  'Slovakia': ['europe', 'emea'],
+  'Ukraine': ['europe', 'emea'],
+  'Estonia': ['europe', 'emea'],
+  'Latvia': ['europe', 'emea'],
+  'Lithuania': ['europe', 'emea'],
+  'Iceland': ['europe', 'emea'],
+  'Luxembourg': ['europe', 'emea'],
+  'Malta': ['europe', 'emea'],
+  'Cyprus': ['europe', 'emea'],
+  'Belarus': ['europe', 'emea'],
+  'Montenegro': ['europe', 'emea'],
+  'Kosovo': ['europe', 'emea'],
+  'Bosnia and Herzegovina': ['europe', 'emea'],
+  'Albania': ['europe', 'emea'],
+  'North Macedonia': ['europe', 'emea'],
+  'Moldova': ['europe', 'emea'],
+
+  // Middle East & EMEA
+  'Turkey': ['europe', 'emea', 'middle east'],
+  'Israel': ['middle east', 'emea'],
+  'United Arab Emirates': ['middle east', 'emea'],
+  'Saudi Arabia': ['middle east', 'emea'],
+  'Qatar': ['middle east', 'emea'],
+  'Jordan': ['middle east', 'emea'],
+  'Lebanon': ['middle east', 'emea'],
+  'Armenia': ['emea'],
+  'Azerbaijan': ['emea'],
+  'Georgia': ['emea'],
+
+  // APAC / Asia
+  'India': ['apac / asia'],
+  'Singapore': ['apac / asia'],
+  'Japan': ['apac / asia'],
+  'Australia': ['apac / asia'],
+  'New Zealand': ['apac / asia'],
+  'China': ['apac / asia'],
+  'South Korea': ['apac / asia'],
+  'Hong Kong': ['apac / asia'],
+  'Taiwan': ['apac / asia'],
+  'Malaysia': ['apac / asia'],
+  'Indonesia': ['apac / asia'],
+  'Thailand': ['apac / asia'],
+  'Vietnam': ['apac / asia'],
+  'Philippines': ['apac / asia'],
+  'Pakistan': ['apac / asia'],
+  'Bangladesh': ['apac / asia'],
+  'Sri Lanka': ['apac / asia'],
+  'Nepal': ['apac / asia'],
+  'Kazakhstan': ['apac / asia', 'emea'],
+
+  // Africa & EMEA
+  'Egypt': ['africa', 'middle east', 'emea'],
+  'Nigeria': ['africa', 'emea'],
+  'Kenya': ['africa', 'emea'],
+  'Ghana': ['africa', 'emea'],
+  'South Africa': ['africa', 'emea'],
+  'Cameroon': ['africa', 'emea'],
+  'Angola': ['africa', 'emea'],
+  'Morocco': ['africa', 'middle east', 'emea'],
+  'Algeria': ['africa', 'middle east', 'emea'],
+  'Tunisia': ['africa', 'middle east', 'emea'],
+  'Ethiopia': ['africa', 'emea'],
+  'Tanzania': ['africa', 'emea'],
+  'Uganda': ['africa', 'emea'],
+  'Rwanda': ['africa', 'emea'],
+  'Senegal': ['africa', 'emea'],
+  "Côte d'Ivoire": ['africa', 'emea'],
+};
+
 /**
  * Resolve one job's location into canonical countries + regions.
  * Used for BOTH the sidebar counts and the filter so the two always agree.
@@ -310,9 +425,19 @@ const REMOTE_GLOBAL = 'remote / global';
  */
 export function jobGeo(location, country) {
   const countries = countriesFromLocation(location, country);
-  const regions = regionsFromLocation(location).filter(
+  const textRegions = regionsFromLocation(location).filter(
     (r) => r !== REMOTE_GLOBAL || countries.length === 0
   );
+  const countryRegions = [];
+  for (const c of countries) {
+    const mapped = COUNTRY_TO_REGIONS[c];
+    if (mapped) {
+      for (const reg of mapped) {
+        if (!countryRegions.includes(reg)) countryRegions.push(reg);
+      }
+    }
+  }
+  const regions = Array.from(new Set([...textRegions, ...countryRegions]));
   return { countries, regions };
 }
 

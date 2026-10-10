@@ -36,6 +36,8 @@ function CornerPlusMarkers({ color = '#94a3b8', bg = '#ffffff', size = '13px' })
 // Verified company contacts directory
 export const COMPANY_CONTACTS = {
   shopify: {
+
+
     leadership: { name: 'Tobi Lütke', title: 'Founder & CEO', email: 'tobi@shopify.com' },
     recruiter: { name: 'Shopify Talent Acquisition', title: 'Recruiting Team', email: 'careers@shopify.com' },
     hiringManager: { name: 'Shopify Engineering & Product Leads', title: 'Hiring Committee', email: 'talent@shopify.com' }
@@ -339,23 +341,46 @@ function formatDisplaySalary(rawSalary) {
 }
 
 function formatDisplayDate(rawDate) {
-  if (!rawDate) return 'October 08, 2026';
+  if (!rawDate) return 'Recently listed';
   const str = String(rawDate).trim();
+  
+  let d = null;
   if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
     try {
-      const d = new Date(str);
-      if (!isNaN(d.getTime())) {
-        return d.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
-      }
-    } catch (e) {
-      // fallback
-    }
+      d = new Date(str);
+    } catch (e) {}
+  } else if (/^\d{10,13}$/.test(str)) {
+    try {
+      const ms = str.length === 10 ? parseInt(str, 10) * 1000 : parseInt(str, 10);
+      d = new Date(ms);
+    } catch (e) {}
   }
+  
+  if (d && !isNaN(d.getTime())) {
+    const diffMs = Date.now() - d.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (diffHours >= 0 && diffHours < 1) {
+      const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+      return `${diffMins}m ago`;
+    }
+    if (diffHours >= 1 && diffHours < 24) {
+      return `${diffHours}h ago`;
+    }
+    if (diffHours >= 24 && diffHours < 48) {
+      return 'Yesterday';
+    }
+    if (diffHours >= 48 && diffHours < 24 * 7) {
+      return `${Math.floor(diffHours / 24)}d ago`;
+    }
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
   if (str.startsWith('Direct from')) {
-    return 'October 08, 2026';
+    return 'Recently listed';
   }
   return str;
 }
+
 
 function getCardSkills(job) {
   if (Array.isArray(job.skills) && job.skills.length > 0) {
@@ -670,17 +695,19 @@ function CompanyOutreachModal({ job, isOpen, onClose }) {
   );
 }
 
-function JobCard({ job, onToggleBookmark, onOpenReachout }) {
+function JobCard({ job, onSelect, onToggleBookmark, onOpenReachout }) {
   const displaySalary = formatDisplaySalary(job.salary_range || job.salary);
-  const displayDate = formatDisplayDate(job.discovered_at || job.postedDate);
+  const displayDate = formatDisplayDate(
+    job.posted_date || 
+    job.postedDate || 
+    job.date_posted || 
+    job.created_at || 
+    job.discovered_at
+  );
   const locationText = job.location || job.country || 'Worldwide';
-  const skills = getCardSkills(job);
   const applyHref = resolveApplyUrl(job);
   const careerPortalHref = resolveCareerPortalUrl(job);
   const workplaceText = job.workplace_type || job.workplace || 'Remote';
-  const departmentText = job.department || 'Operations';
-  const employmentText = job.jobType || job.employment_type || 'Full-time';
-  const seniorityText = job.experience_level || 'Lead / Staff';
   const logoUrl = resolveLogoUrl(job);
 
   const handleBookmark = (e) => {
@@ -691,309 +718,197 @@ function JobCard({ job, onToggleBookmark, onOpenReachout }) {
   return (
     <div 
       className="careerhut-job-card"
+      onClick={() => onSelect && onSelect(job)}
     >
       {/* Corner Plus Accents */}
       <CornerPlusMarkers color="#94a3b8" bg="#ffffff" size="13px" />
 
       <div>
-        {/* Top Header: Company logo & Title & Bookmark */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', minWidth: 0 }}>
-            <div style={{ marginTop: '2px', flexShrink: 0 }}>
-              <CompanyLogo name={job.company} src={logoUrl} size={32} radius={0} />
-            </div>
-
-            <div style={{ minWidth: 0 }}>
-              <h3 style={{
-                fontSize: '1.05rem',
-                fontWeight: 700,
-                color: '#1e293b',
-                margin: 0,
-                lineHeight: 1.35,
-                wordBreak: 'break-word',
-                fontFamily: 'var(--font-main, sans-serif)'
-              }}>
-                {job.title}
-              </h3>
-              <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '2px' }}>
-                {job.company}
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={handleBookmark}
-            title={job.is_bookmarked ? 'Remove bookmark' : 'Bookmark job'}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: job.is_bookmarked ? '#780115' : '#94a3b8',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}
-          >
-            <Bookmark size={17} fill={job.is_bookmarked ? '#780115' : 'none'} />
-          </button>
-        </div>
-
-        {/* Tag Pills: Single non-breaking line on desktop, clean wrap on mobile */}
-        <div className="job-card-tags-row">
-          {/* App-themed Workplace Pill */}
+        {/* Top Header: Company Logo & Unframed Workplace text */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '14px' }}>
+          <CompanyLogo name={job.company} src={logoUrl} size={32} radius={0} />
           <span style={{
-            background: '#fff1f2',
-            color: '#780115',
-            border: '1px dashed #fecdd3',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            padding: '2px 8px',
-            borderRadius: 0,
-            whiteSpace: 'nowrap',
-            flexShrink: 0
+            fontSize: '0.76rem',
+            fontWeight: 600,
+            color: '#64748b',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase'
           }}>
             {workplaceText}
           </span>
-
-          {/* Department Pill */}
-          {departmentText && (
-            <span style={{
-              background: '#f8fafc',
-              color: '#475569',
-              border: '1px dashed #cbd5e1',
-              fontSize: '0.72rem',
-              fontWeight: 500,
-              padding: '2px 8px',
-              borderRadius: 0,
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              maxWidth: '110px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              {departmentText}
-            </span>
-          )}
-
-          {/* Employment Type Pill */}
-          {employmentText && (
-            <span style={{
-              background: '#f8fafc',
-              color: '#475569',
-              border: '1px dashed #cbd5e1',
-              fontSize: '0.72rem',
-              fontWeight: 500,
-              padding: '2px 8px',
-              borderRadius: 0,
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}>
-              {employmentText}
-            </span>
-          )}
-
-          {/* Seniority or 1 Key Skill Badge */}
-          {skills && skills.length > 0 ? (
-            <span
-              style={{
-                background: '#ffffff',
-                border: '1px dashed #cbd5e1',
-                color: '#475569',
-                fontSize: '0.72rem',
-                fontWeight: 500,
-                padding: '2px 8px',
-                borderRadius: 0,
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                maxWidth: '95px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              {skills[0]}
-            </span>
-          ) : seniorityText ? (
-            <span style={{
-              background: '#f8fafc',
-              color: '#475569',
-              border: '1px dashed #cbd5e1',
-              fontSize: '0.72rem',
-              fontWeight: 500,
-              padding: '2px 8px',
-              borderRadius: 0,
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              maxWidth: '95px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              {seniorityText}
-            </span>
-          ) : null}
         </div>
 
-        {/* Salary Row */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontSize: '0.84rem',
+        {/* Job Title */}
+        <h3 style={{
+          fontSize: '1.05rem',
           fontWeight: 700,
           color: '#0f172a',
-          marginBottom: '5px'
+          margin: '0 0 6px 0',
+          lineHeight: 1.35,
+          wordBreak: 'break-word',
+          fontFamily: 'var(--font-main, sans-serif)'
         }}>
-          <span style={{
-            width: '15px',
-            height: '15px',
-            borderRadius: '50%',
-            background: '#780115',
-            color: '#ffffff',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.62rem',
-            fontWeight: 800
-          }}>
-            $
-          </span>
-          <span>{displaySalary}</span>
-        </div>
+          {job.title}
+        </h3>
 
-        {/* Location Row (Under the salary) */}
+        {/* Company & Location (Unframed) */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '5px',
-          fontSize: '0.78rem',
+          fontSize: '0.82rem',
           color: '#64748b',
           fontWeight: 500,
-          marginBottom: '6px',
+          marginBottom: '8px',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis'
         }}>
-          <MapPin size={13} color="#94a3b8" style={{ flexShrink: 0 }} />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{locationText}</span>
+          <span>{job.company}</span>
+          <span style={{ margin: '0 6px' }}>•</span>
+          <span>{locationText}</span>
         </div>
 
-        {/* Date Row */}
+        {/* Salary (Unframed, clean typography) */}
+        <div style={{
+          fontSize: '0.88rem',
+          fontWeight: 700,
+          color: '#0f172a',
+          marginBottom: '6px'
+        }}>
+          {displaySalary}
+        </div>
+
+        {/* Date Row (Posted Time) */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
+          gap: '5px',
           fontSize: '0.76rem',
           color: '#94a3b8',
-          marginBottom: '18px'
+          fontWeight: 500,
+          marginBottom: '16px'
         }}>
-          <Clock size={13} color="#94a3b8" style={{ flexShrink: 0 }} />
+          <Clock size={12} color="#94a3b8" style={{ flexShrink: 0 }} />
           <span>{displayDate}</span>
         </div>
       </div>
 
-      {/* Bottom Action: 3 Buttons on a Single Line (Responsive Stacking on Mobile) */}
-      <div className="job-card-actions-row">
+      {/* Bottom Actions: Bold Apply Now + Secondary Sub-row */}
+      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <a
           href={applyHref}
           target="_blank"
           rel="noopener noreferrer"
           className="job-card-apply-btn"
+          onClick={(e) => e.stopPropagation()}
           style={{
-            background: '#780115',
+            width: '100%',
+            backgroundColor: '#780115',
             color: '#ffffff',
-            fontSize: '0.78rem',
+            fontSize: '0.82rem',
             fontWeight: 700,
-            padding: '7px 14px',
+            padding: '9px 14px',
             borderRadius: 0,
             border: '1px solid #780115',
             textDecoration: 'none',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '4px',
-            whiteSpace: 'nowrap',
+            gap: '6px',
+            boxSizing: 'border-box',
             boxShadow: '0 1px 2px rgba(120, 1, 21, 0.15)',
-            transition: 'all 0.15s ease'
+            transition: 'background-color 0.15s ease'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5c0010'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#780115'}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#5c0010')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#780115')}
         >
-          <span>Apply</span>
-          <ArrowUpRight size={12} />
+          <span>Apply Now</span>
+          <ArrowUpRight size={13} />
         </a>
 
-        <a
-          href={careerPortalHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="job-card-secondary-btn"
-          title={`Visit official ${job.company || 'company'} careers page`}
-          style={{
-            background: '#ffffff',
-            color: '#334155',
-            fontSize: '0.76rem',
-            fontWeight: 600,
-            padding: '7px 6px',
-            borderRadius: 0,
-            border: '1px dashed #cbd5e1',
-            textDecoration: 'none',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            transition: 'all 0.15s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#780115';
-            e.currentTarget.style.color = '#780115';
-            e.currentTarget.style.background = '#fff1f2';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#cbd5e1';
-            e.currentTarget.style.color = '#334155';
-            e.currentTarget.style.background = '#ffffff';
-          }}
-        >
-          <Globe size={12} color="currentColor" style={{ flexShrink: 0 }} />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>Careers</span>
-        </a>
+        {/* Secondary Sub-row: Careers link on the left, Outreach & Bookmark on the right */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+          <a
+            href={careerPortalHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              color: '#475569',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              textDecoration: 'underline',
+              textUnderlineOffset: '3px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'color 0.15s ease'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#780115')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#475569')}
+          >
+            <span>Careers</span>
+          </a>
 
-        <button
-          onClick={() => onOpenReachout(job)}
-          className="job-card-secondary-btn"
-          title="Open Company Outreach & Hiring Team Directory"
-          style={{
-            background: '#fff1f2',
-            color: '#780115',
-            fontSize: '0.76rem',
-            fontWeight: 700,
-            padding: '7px 6px',
-            borderRadius: 0,
-            border: '1px dashed #780115',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            transition: 'all 0.15s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#ffe4e6';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#fff1f2';
-          }}
-        >
-          <Mail size={12} color="#780115" style={{ flexShrink: 0 }} />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>Outreach</span>
-        </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenReachout(job);
+              }}
+              title="Direct Recruiter & Hiring Lead Outreach"
+              style={{
+                background: '#ffffff',
+                color: '#1e293b',
+                border: '1px dashed #cbd5e1',
+                borderRadius: 0,
+                padding: '4px 10px',
+                fontSize: '0.76rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#780115';
+                e.currentTarget.style.color = '#780115';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#cbd5e1';
+                e.currentTarget.style.color = '#1e293b';
+              }}
+            >
+              <Mail size={13} color="currentColor" />
+              <span>Outreach</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBookmark}
+              title={job.is_bookmarked ? 'Remove bookmark' : 'Bookmark job'}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: job.is_bookmarked ? '#780115' : '#94a3b8',
+                transition: 'color 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!job.is_bookmarked) e.currentTarget.style.color = '#780115';
+              }}
+              onMouseLeave={(e) => {
+                if (!job.is_bookmarked) e.currentTarget.style.color = '#94a3b8';
+              }}
+            >
+              <Bookmark size={16} fill={job.is_bookmarked ? '#780115' : 'none'} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1072,6 +987,7 @@ export default function JobCardGrid({
           <JobCard 
             key={job.id} 
             job={job} 
+            onSelect={() => onSelectJob && onSelectJob(job)}
             onToggleBookmark={onToggleBookmark} 
             onOpenReachout={(j) => setReachoutModalJob(j)}
           />

@@ -1,12 +1,16 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Building2, Globe } from 'lucide-react';
+import CustomDropdown from './CustomDropdown';
 
 export default function FilterModal({
   isOpen,
   onClose,
-  companies,
+  companies = [],
   selectedCompany,
   onSelectCompany,
+  regions = [],
+  selectedRegion,
+  onSelectRegion,
   selectedWorkplace,
   onSelectWorkplace,
   hasEmailOnly,
@@ -32,28 +36,41 @@ export default function FilterModal({
             <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: '6px' }}>
               Company
             </label>
-            <select
-              value={selectedCompany}
-              onChange={(e) => onSelectCompany(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-sm)',
-                color: 'var(--text-main)',
-                fontFamily: 'var(--font-main)',
-                fontSize: '0.88rem',
-                outline: 'none'
-              }}
-            >
-              <option value="">All Companies</option>
-              {companies.map((c) => (
-                <option key={c.company} value={c.company}>
-                  {c.company} ({c.job_count})
-                </option>
-              ))}
-            </select>
+            <CustomDropdown
+              options={companies.map((c) => ({
+                value: c.company,
+                label: c.company,
+                count: c.job_count,
+                logoUrl: c.company_logo || null
+              }))}
+              value={selectedCompany || ''}
+              onChange={(val) => onSelectCompany(val)}
+              placeholder={`All Companies (${companies.length})`}
+              searchPlaceholder="Search companies..."
+              triggerIcon={Building2}
+              variant="modal"
+            />
+          </div>
+
+          {/* Region Filter */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: '6px' }}>
+              Region
+            </label>
+            <CustomDropdown
+              options={regions.map((r) => ({
+                value: r.value || r.label,
+                label: r.label,
+                count: r.count,
+                icon: r.icon
+              }))}
+              value={selectedRegion || ''}
+              onChange={(val) => onSelectRegion && onSelectRegion(val)}
+              placeholder={`All Regions (${regions.length})`}
+              searchPlaceholder="Search regions..."
+              triggerIcon={Globe}
+              variant="modal"
+            />
           </div>
 
           {/* Workplace Filter */}

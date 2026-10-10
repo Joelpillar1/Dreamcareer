@@ -158,7 +158,8 @@ def fetch_greenhouse(session, token: str, company: str, company_url: str, career
             workplace_type=_workplace_type(location, title),
             description=desc,
             apply_url=job_url,
-            posted_date=item.get("updated_at") or item.get("first_published"),
+            # first_published is the true posting date; updated_at moves on any edit.
+            posted_date=item.get("first_published") or item.get("updated_at"),
             provider="greenhouse",
             raw={"internal_job_id": item.get("internal_job_id")},
         )
