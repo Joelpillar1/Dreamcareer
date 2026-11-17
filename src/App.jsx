@@ -7,6 +7,10 @@ import FilterModal from './components/FilterModal';
 import LandingPage from './components/LandingPage';
 import JobCardGrid from './components/JobCardGrid';
 import LegalPage from './components/LegalPage';
+import AuthModal from './components/AuthModal';
+import OnboardingFlow from './components/OnboardingFlow';
+import { getStoredUser, signOutUser, isUserSubscribed, formatSupabaseUser, saveUser } from './utils/auth';
+import { supabase } from './config/supabase';
 import { DIRECT_CAREER_JOBS } from './data/directJobs';
 import { buildLocationLists, jobGeo } from './utils/locations';
 import { resolveLogoUrl } from './components/CompanyLogo';
@@ -148,6 +152,7 @@ function resolveViewFromUrl() {
   if (pathname === '/privacy' || pathname === '/privacy.html' || hash === '#privacy') return 'privacy';
   if (pathname === '/terms' || pathname === '/terms.html' || hash === '#terms') return 'terms';
   if (pathname === '/refund' || pathname === '/refund.html' || hash === '#refund') return 'refund';
+  if (pathname === '/onboarding' || pathname === '/onboarding.html' || hash === '#onboarding') return 'onboarding';
   if (pathname === '/dashboard' || pathname === '/jobs' || hash === '#dashboard' || hash === '#jobs') {
     return 'dashboard';
   }
@@ -166,6 +171,9 @@ export default function App() {
   // Modals
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState('signup');
 
   // Filters
   const [keyword, setKeyword] = useState('');
@@ -180,8 +188,41 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState({ loaded: 0, total: 0 });
 
+  // Route protection: Gated dashboard requires active subscription
+  useEffect(() => {
+    if (currentView === 'dashboard' && !isUserSubscribed(currentUser)) {
+      setCurrentView('landing');
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/');
+      }
+    }
+  }, [currentView, currentUser]);
+
   useEffect(() => {
     loadAllData();
+
+    // Check active Supabase session on startup
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const u = formatSupabaseUser(session.user);
+        saveUser(u);
+        setCurrentUser(u);
+      }
+    }).catch((err) => {
+      console.warn('Supabase session initialization warning:', err);
+    });
+
+    // Listen to real-time Supabase auth state changes (sign in, sign out, token refresh, OAuth callback)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        const u = formatSupabaseUser(session.user);
+        saveUser(u);
+        setCurrentUser(u);
+      } else if (event === 'SIGNED_OUT') {
+        saveUser(null);
+        setCurrentUser(null);
+      }
+    });
 
     const handleUrlChange = () => {
       setCurrentView(resolveViewFromUrl());
@@ -190,6 +231,7 @@ export default function App() {
     window.addEventListener('hashchange', handleUrlChange);
     window.addEventListener('popstate', handleUrlChange);
     return () => {
+      subscription?.unsubscribe();
       window.removeEventListener('hashchange', handleUrlChange);
       window.removeEventListener('popstate', handleUrlChange);
     };
@@ -471,6 +513,97 @@ export default function App() {
     setFilterModalOpen(false);
   };
 
+  const handleOpenAuth = (mode = 'signin') => {
+    setAuthModalMode(mode);
+    setAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = (user, isNewUser) => {
+    setCurrentUser(user);
+    setAuthModalOpen(false);
+
+    if (user && user.hasPaid) {
+      setCurrentView('dashboard');
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '/dashboard');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else {
+      setCurrentView('onboarding');
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '/onboarding');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  };
+
+  const handleOnboardingComplete = (onboardingData, plan) => {
+    const updatedUser = getStoredUser();
+    setCurrentUser(updatedUser);
+
+    // Apply onboarding preferences to live dashboard filters
+    if (onboardingData) {
+      if (onboardingData.workplace) {
+        setWorkplace(onboardingData.workplace);
+      }
+      if (onboardingData.region && onboardingData.region !== 'Worldwide / Anywhere') {
+        setRegion(onboardingData.region);
+      }
+      if (onboardingData.selectedRoles && onboardingData.selectedRoles.length > 0) {
+        const roleMap = {
+          fullstack: 'Fullstack',
+          backend: 'Backend',
+          ai_ml: 'AI',
+          devops: 'DevOps',
+          mobile: 'Mobile',
+          product: 'Product',
+          design: 'Design',
+          data: 'Data',
+          'Software Engineer': 'Fullstack',
+          'Frontend Developer': 'Frontend',
+          'Backend Engineer': 'Backend',
+          'Full-Stack Developer': 'Fullstack',
+          'AI / Machine Learning Engineer': 'AI',
+          'DevOps & Cloud Infrastructure': 'DevOps',
+          'Mobile Developer (iOS & Android)': 'Mobile',
+          'Product Manager': 'Product',
+          'UI/UX & Product Design': 'Design',
+          'Data Scientist & Analytics': 'Data',
+        };
+        const firstRole = onboardingData.selectedRoles[0];
+        if (roleMap[firstRole]) {
+          setActiveTag(roleMap[firstRole]);
+        } else if (typeof firstRole === 'string' && firstRole.trim()) {
+          setKeyword(firstRole.trim());
+        }
+      }
+    }
+
+    setCurrentView('dashboard');
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/dashboard');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleExitOnboarding = () => {
+    setCurrentView('landing');
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleSignOut = () => {
+    signOutUser();
+    setCurrentUser(null);
+    setCurrentView('landing');
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleExploreJobs = (searchQuery = '') => {
     if (searchQuery) {
       if (searchQuery.toLowerCase() === 'remote') {
@@ -480,14 +613,38 @@ export default function App() {
         setKeyword(searchQuery);
       }
     }
-    setCurrentView('dashboard');
-    if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', '/dashboard');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 1. If user is authenticated and has an active paid subscription -> grant dashboard access
+    if (isUserSubscribed(currentUser)) {
+      setCurrentView('dashboard');
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '/dashboard');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
     }
+
+    // 2. If authenticated but has not paid -> open onboarding with slug /onboarding
+    if (currentUser && currentUser.isAuthenticated && !currentUser.hasPaid) {
+      setCurrentView('onboarding');
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '/onboarding');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
+
+    // 3. New user -> open Sign Up modal
+    setAuthModalMode('signup');
+    setAuthModalOpen(true);
   };
 
   const handleCrawlFromLanding = async (url) => {
+    if (!isUserSubscribed(currentUser)) {
+      handleExploreJobs(url);
+      return;
+    }
+
     setCurrentView('dashboard');
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/dashboard');
@@ -607,6 +764,16 @@ export default function App() {
 
   const bookmarkedCount = jobs.filter((j) => j.is_bookmarked).length;
 
+  if (currentView === 'onboarding') {
+    return (
+      <OnboardingFlow 
+        currentUser={currentUser}
+        onComplete={handleOnboardingComplete}
+        onExit={handleExitOnboarding}
+      />
+    );
+  }
+
   if (currentView === 'privacy' || currentView === 'terms' || currentView === 'refund') {
     return (
       <LegalPage 
@@ -621,20 +788,32 @@ export default function App() {
 
   if (currentView === 'landing') {
     return (
-      <LandingPage 
-        onExploreJobs={handleExploreJobs}
-        onCrawlUrl={handleCrawlFromLanding}
-        onNavigateLegal={handleNavigateLegal}
-        totalJobsCount={jobs.length}
-        onSelectCompany={(comp) => {
-          setCompany(comp);
-          handleExploreJobs();
-        }}
-        onSelectTag={(tag) => {
-          setActiveTag(tag);
-          handleExploreJobs();
-        }}
-      />
+      <>
+        <LandingPage 
+          onExploreJobs={handleExploreJobs}
+          onCrawlUrl={handleCrawlFromLanding}
+          onNavigateLegal={handleNavigateLegal}
+          totalJobsCount={jobs.length}
+          currentUser={currentUser}
+          onOpenAuth={handleOpenAuth}
+          onSignOut={handleSignOut}
+          onSelectCompany={(comp) => {
+            setCompany(comp);
+            handleExploreJobs();
+          }}
+          onSelectTag={(tag) => {
+            setActiveTag(tag);
+            handleExploreJobs();
+          }}
+        />
+
+        <AuthModal 
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          initialMode={authModalMode}
+          onSuccess={handleAuthSuccess}
+        />
+      </>
     );
   }
 
@@ -663,6 +842,8 @@ export default function App() {
           onToggleBookmarked={setOnlyBookmarked}
           onResetFilters={handleResetFilters}
           onGoToLanding={handleGoToLanding}
+          currentUser={currentUser}
+          onSignOut={handleSignOut}
         />
       </div>
 
@@ -700,6 +881,8 @@ export default function App() {
             onGoToLanding={handleGoToLanding}
             isMobileDrawer={true}
             onCloseMobile={() => setMobileSidebarOpen(false)}
+            currentUser={currentUser}
+            onSignOut={handleSignOut}
           />
         </div>
       )}

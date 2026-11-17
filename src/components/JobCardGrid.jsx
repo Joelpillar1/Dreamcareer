@@ -797,28 +797,14 @@ function JobCard({ job, onSelect, onToggleBookmark, onOpenReachout }) {
           href={applyHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="job-card-apply-btn"
+          className="job-card-apply-btn btn-stitch-primary"
           onClick={(e) => e.stopPropagation()}
           style={{
             width: '100%',
-            backgroundColor: '#780115',
-            color: '#ffffff',
+            padding: '8px 14px',
             fontSize: '0.82rem',
-            fontWeight: 700,
-            padding: '9px 14px',
-            borderRadius: 0,
-            border: '1px solid #780115',
-            textDecoration: 'none',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            boxSizing: 'border-box',
-            boxShadow: '0 1px 2px rgba(120, 1, 21, 0.15)',
-            transition: 'background-color 0.15s ease'
+            gap: '6px'
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#5c0010')}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#780115')}
         >
           <span>Apply Now</span>
           <ArrowUpRight size={13} />

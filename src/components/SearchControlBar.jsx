@@ -226,25 +226,11 @@ export default function SearchControlBar({
         <button 
           onClick={onSearchOrCrawl}
           disabled={isSearching}
-          className="search-submit-btn"
+          className="search-submit-btn btn-stitch-primary"
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            backgroundColor: '#780115',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: 0,
-            padding: '9px 18px',
-            fontSize: '0.88rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'background-color 0.15s ease',
-            whiteSpace: 'nowrap'
+            padding: '8px 18px',
+            fontSize: '0.86rem'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5c0010'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#780115'}
         >
           {isSearching ? (
             <div className="spinner" style={{ width: '14px', height: '14px', borderWidth: '2px' }} />

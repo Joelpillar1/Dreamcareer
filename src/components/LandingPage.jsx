@@ -62,7 +62,7 @@ const FEATURE_TABS = [
     icon: Globe,
     badge: 'Discover',
     headline: 'Index company career portals in seconds',
-    description: 'Bypass laggy aggregate job boards. Ingest official career domains (Miro, Supabase, Stripe, Figma) with verified job details and hiring team contacts.',
+    description: 'Bypass laggy aggregate job boards. Ingest official career domains (Miro, Supabase, Stripe, Figma) with verified job details and reachable hiring contacts whenever available.',
     bullets: [
       'Zero recruiter middlemen, 100% authentic listings',
       'Deep browser execution for dynamic JavaScript portals',
@@ -73,17 +73,17 @@ const FEATURE_TABS = [
   {
     id: 'email',
     title: 'Direct inboxes',
-    subtitle: 'Recruiter contacts',
+    subtitle: 'Reachable contacts',
     icon: Mail,
     badge: 'Outreach',
-    headline: 'Connect directly with hiring managers',
-    description: 'Automated parser surfaces verified hiring emails, team inboxes, and talent partner addresses so you can send high-impact outreach.',
+    headline: 'Reach hiring teams directly when available',
+    description: 'Whenever talent team inboxes or hiring contacts are publicly listed and reachable on official job postings, Careerhut extracts and verifies them for direct, high-impact outreach.',
     bullets: [
-      'Verified hiring team emails & talent contacts',
-      '1-click mailto templates with prefilled subject lines',
-      'Direct team contacts for high-priority openings'
+      'Surfaces reachable hiring emails & talent contacts when available',
+      '1-click outreach templates with prefilled role references',
+      'Direct company application routes for all indexed openings'
     ],
-    buttonText: 'Find recruiter contacts'
+    buttonText: 'Explore available openings'
   },
   {
     id: 'filters',
@@ -128,8 +128,8 @@ const FAQS = [
     answer: 'Yes! Careerhut is 100% free to explore, search, filter, and discover. You can browse live verified jobs, bookmark positions, and use direct portal discovery without any subscription fees.'
   },
   {
-    question: 'Are the recruiter emails verified?',
-    answer: 'Yes. Careerhut scans the official job posting pages and company domain headers to extract authentic talent inboxes and recruiter contacts. When available, you can click to launch your mail client with pre-filled application details.'
+    question: 'Are recruiter and hiring team contacts guaranteed for every job?',
+    answer: 'Not every job posting publishes a direct recruiter inbox, as many companies prefer portal-only submissions. However, whenever official career pages or postings feature reachable talent inboxes or hiring contacts, Careerhut automatically detects, verifies, and surfaces them so you can send targeted outreach alongside your direct application.'
   },
   {
     question: 'How often are the job listings updated?',
@@ -226,7 +226,10 @@ export default function LandingPage({
   totalJobsCount = 10420,
   onSelectCompany,
   onSelectTag,
-  onNavigateLegal
+  onNavigateLegal,
+  currentUser = null,
+  onOpenAuth = () => {},
+  onSignOut = () => {}
 }) {
   const [heroInput, setHeroInput] = useState('');
   const [activeTab, setActiveTab] = useState('sync');
@@ -267,6 +270,9 @@ export default function LandingPage({
         onGoToLanding={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         onExploreJobs={onExploreJobs}
         totalJobsCount={totalJobsCount}
+        currentUser={currentUser}
+        onOpenAuth={onOpenAuth}
+        onSignOut={onSignOut}
       />
 
       {/* ==================== 2. HERO SECTION ==================== */}
@@ -313,9 +319,9 @@ export default function LandingPage({
 
           {/* Hero Subtitle (Guaranteed 2-line layout on Desktop & Mobile) */}
           <p className="hero-subtext">
-            <span className="hero-subtext-line">Search live roles directly from official career pages,</span>
+            <span className="hero-subtext-line">Search live roles directly from official company career pages,</span>
             <br className="hero-subtext-break" />
-            <span className="hero-subtext-line">with verified recruiter emails & direct hiring contacts.</span>
+            <span className="hero-subtext-line">with direct ATS links & real-time role alerts.</span>
           </p>
 
           {/* Hero CTA Buttons (Side by side on all screen sizes) */}
@@ -576,30 +582,7 @@ export default function LandingPage({
 
               <button
                 onClick={() => onExploreJobs()}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  backgroundColor: '#780115',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  fontSize: '0.92rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(120, 1, 21, 0.22)',
-                  transition: 'all 0.15s ease',
-                  width: 'fit-content'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#5c0010';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#780115';
-                  e.currentTarget.style.transform = 'none';
-                }}
+                className="btn-stitch-primary"
               >
                 <span>{currentFeature.buttonText || 'Explore roles'}</span>
                 <ArrowRight size={15} />
@@ -664,13 +647,13 @@ export default function LandingPage({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Mail size={15} color="#780115" />
-                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Direct Recruiter Contact</span>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Hiring Contact (When Available)</span>
                     </div>
-                    <span style={{ fontSize: '0.72rem', color: '#059669', backgroundColor: '#ecfdf5', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Verified Contact</span>
+                    <span style={{ fontSize: '0.72rem', color: '#059669', backgroundColor: '#ecfdf5', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Surfaced If Reachable</span>
                   </div>
                   <div style={{ padding: '10px 12px', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Talent Partner</div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Talent Partner • Detected on posting</div>
                       <div style={{ fontSize: '0.82rem', fontFamily: 'monospace', color: '#0f172a', fontWeight: 600 }}>careers@supabase.com</div>
                     </div>
                     <span style={{ fontSize: '0.7rem', color: '#780115', fontWeight: 600 }}>1-Click Mailto</span>
@@ -697,7 +680,7 @@ export default function LandingPage({
                     <span style={{ padding: '4px 10px', borderRadius: '999px', backgroundColor: '#780115', color: '#fff', fontSize: '0.74rem', fontWeight: 600 }}>100% Remote</span>
                     <span style={{ padding: '4px 10px', borderRadius: '999px', backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.74rem', fontWeight: 600 }}>United States</span>
                     <span style={{ padding: '4px 10px', borderRadius: '999px', backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.74rem', fontWeight: 600 }}>Senior / Staff</span>
-                    <span style={{ padding: '4px 10px', borderRadius: '999px', backgroundColor: '#ecfdf5', color: '#059669', fontSize: '0.74rem', fontWeight: 600 }}>With Recruiter Email</span>
+                    <span style={{ padding: '4px 10px', borderRadius: '999px', backgroundColor: '#ecfdf5', color: '#059669', fontSize: '0.74rem', fontWeight: 600 }}>Direct Contact Available</span>
                   </div>
                   <div style={{ padding: '12px', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '6px' }}>
                     <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>
@@ -857,7 +840,7 @@ export default function LandingPage({
             margin: '0 auto 30px',
             lineHeight: 1.6
           }}>
-            Skip the recruiter black hole. Access verified direct listings, hiring contacts, and intelligent career tools built for ambitious builders.
+            Skip the middleman black hole. Access verified direct listings, reachable hiring contacts where available, and intelligent career tools built for ambitious builders.
           </p>
 
           <div style={{
@@ -869,29 +852,7 @@ export default function LandingPage({
           }}>
             <button
               onClick={() => onExploreJobs()}
-              style={{
-                padding: '12px 26px',
-                borderRadius: '8px',
-                backgroundColor: '#780115',
-                color: '#ffffff',
-                border: 'none',
-                fontWeight: 700,
-                fontSize: '0.96rem',
-                cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(120, 1, 21, 0.28)',
-                transition: 'all 0.15s ease',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#5c0010';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#780115';
-                e.currentTarget.style.transform = 'none';
-              }}
+              className="btn-stitch-primary"
             >
               <span>Explore all jobs</span>
               <ArrowRight size={16} />
@@ -901,22 +862,7 @@ export default function LandingPage({
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              style={{
-                padding: '12px 22px',
-                borderRadius: '8px',
-                backgroundColor: '#ffffff',
-                color: '#0f172a',
-                border: '1px solid #cbd5e1',
-                fontWeight: 700,
-                fontSize: '0.96rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+              className="btn-stitch-secondary"
             >
               <span>Direct portal search</span>
               <Globe size={16} color="#780115" />

@@ -17,7 +17,7 @@ const NO_LOC = /^(not specified|unspecified|unknown|n\/?a|none|tbd|-|—|\?|null
  * 2. Country name / alias / city patterns
  *    Longest alias first inside each entry; matched case-insensitively.
  * ------------------------------------------------------------------ */
-const COUNTRIES = [
+export const COUNTRIES = [
   // NOTE: no bare "america" alias -- "North America" must stay a region.
   ['United States', '🇺🇸', ['united states', 'u\\.?s\\.?a\\.?', '\\bu\\.?s\\.?(?![a-z])', 'usca',
     'washington\\s*d\\.?c\\.?', 'washington,?\\s*d\\.?c\\.?']],

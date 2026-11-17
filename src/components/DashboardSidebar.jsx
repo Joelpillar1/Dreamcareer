@@ -90,7 +90,9 @@ export default function DashboardSidebar({
   onResetFilters,
   onGoToLanding,
   isMobileDrawer = false,
-  onCloseMobile
+  onCloseMobile,
+  currentUser = null,
+  onSignOut = () => {}
 }) {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (isMobileDrawer) return false;
@@ -654,11 +656,11 @@ export default function DashboardSidebar({
               borderBottom: '1px solid var(--border-color)',
               marginBottom: '4px'
             }}>
-              <div style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-main)' }}>
-                Joel Morgan
+              <div style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {currentUser?.name || currentUser?.email?.split('@')[0] || 'Member'}
               </div>
-              <div style={{ fontSize: '0.74rem', color: 'var(--text-subtle)' }}>
-                joel.morgan@careerhut.io
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-subtle)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {currentUser?.email || ''}
               </div>
               <div style={{
                 marginTop: '6px',
@@ -673,7 +675,15 @@ export default function DashboardSidebar({
                 borderRadius: '4px'
               }}>
                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
-                <span>Job Seeker • Pro Plan</span>
+                <span>
+                  {currentUser?.hasPaid
+                    ? (currentUser.plan === 'lifetime'
+                        ? 'Lifetime Access'
+                        : currentUser.plan === 'weekly'
+                          ? 'Weekly Pass'
+                          : 'Monthly Pass')
+                    : 'Active Member'}
+                </span>
               </div>
             </div>
 
@@ -808,7 +818,7 @@ export default function DashboardSidebar({
             <button
               onClick={() => {
                 setProfileOpen(false);
-                alert('Signed out successfully.');
+                onSignOut();
               }}
               style={{
                 display: 'flex',
@@ -838,7 +848,7 @@ export default function DashboardSidebar({
         {/* Profile Card Trigger Button */}
         <div 
           onClick={() => setProfileOpen(!profileOpen)}
-          title={effectiveCollapsed ? "Joel Morgan (Profile & Settings)" : undefined}
+          title={effectiveCollapsed ? `${currentUser?.name || 'Pro Candidate'} (Profile & Settings)` : undefined}
           style={{
             padding: effectiveCollapsed ? '12px 10px' : '12px 14px',
             borderTop: '1px solid var(--border-color)',
@@ -860,21 +870,37 @@ export default function DashboardSidebar({
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
             {/* Avatar with Status Badge */}
             <div style={{ position: 'relative', flexShrink: 0 }}>
-              <img 
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80" 
-                alt="User Profile"
-                style={{
+              {currentUser?.avatar_url ? (
+                <img 
+                  src={currentUser.avatar_url} 
+                  alt={currentUser?.name || 'User'}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '1.5px solid var(--border-color)',
+                    display: 'block'
+                  }}
+                />
+              ) : (
+                <div style={{
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
-                  objectFit: 'cover',
-                  border: '1.5px solid var(--border-color)',
-                  display: 'block'
-                }}
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
+                  background: 'linear-gradient(135deg, #991b1b 0%, #780115 100%)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '0.86rem',
+                  border: '1.5px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: '0 2px 4px rgba(120, 1, 21, 0.2)'
+                }}>
+                  {(currentUser?.name || currentUser?.email || 'U')[0].toUpperCase()}
+                </div>
+              )}
               <span style={{
                 position: 'absolute',
                 bottom: '0px',
@@ -898,7 +924,7 @@ export default function DashboardSidebar({
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
                 }}>
-                  Joel Morgan
+                  {currentUser?.name || currentUser?.email?.split('@')[0] || 'Member'}
                 </div>
                 <div style={{
                   fontSize: '0.7rem',
@@ -907,7 +933,13 @@ export default function DashboardSidebar({
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
                 }}>
-                  Senior Candidate • Pro
+                  {currentUser?.hasPaid
+                    ? (currentUser.plan === 'lifetime' 
+                        ? 'Lifetime Access' 
+                        : currentUser.plan === 'weekly' 
+                          ? 'Weekly Pass' 
+                          : 'Monthly Pass')
+                    : 'Active Member'}
                 </div>
               </div>
             )}

@@ -36,6 +36,8 @@ yarn-error.log*
 .env
 .env.local
 .env.development.local
+client_secret*.json
+*.jsonl
 # IDE & OS
 .vscode/
 .idea/

@@ -292,7 +292,7 @@ class CareerhutRequestHandler(SimpleHTTPRequestHandler):
             jobs = [j.dict() for j in storage.get_jobs(limit=10000)]
             self._send_json(jobs)
 
-        elif path in ["", "/", "/index.html"]:
+        elif path in ["", "/", "/index.html", "/onboarding", "/dashboard", "/jobs", "/privacy", "/terms", "/refund"]:
             index_path = STATIC_DIR / "index.html"
             if index_path.exists():
                 with open(index_path, "rb") as f:

@@ -14,7 +14,10 @@ export default function GlobalNavbar({
   onGoToLanding,
   onExploreJobs,
   totalJobsCount = 0,
-  isLegalPage = false
+  isLegalPage = false,
+  currentUser = null,
+  onOpenAuth = () => {},
+  onSignOut = () => {}
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -130,53 +133,78 @@ export default function GlobalNavbar({
 
         {/* Right Action Buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            onClick={() => onExploreJobs && onExploreJobs()}
-            className="landing-nav-desktop"
-            style={{
-              padding: '7px 14px',
-              fontSize: '0.84rem',
-              fontWeight: 600,
-              color: '#334155',
-              backgroundColor: '#ffffff',
-              border: '1px solid #cbd5e1',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc';
-              e.currentTarget.style.borderColor = '#94a3b8';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#ffffff';
-              e.currentTarget.style.borderColor = '#cbd5e1';
-            }}
-          >
-            <span>Explore roles</span>
-            {totalJobsCount > 0 && (
-              <span style={{
-                fontSize: '0.7rem',
-                padding: '1px 6px',
-                borderRadius: '999px',
-                backgroundColor: '#f1f5f9',
+          {currentUser && currentUser.isAuthenticated ? (
+            <>
+              <span className="landing-nav-desktop" style={{
+                fontSize: '0.82rem',
+                fontWeight: 600,
                 color: '#475569',
-                fontWeight: 700
+                padding: '4px 8px'
               }}>
-                {totalJobsCount >= 1000 ? `${(totalJobsCount / 1000).toFixed(totalJobsCount % 1000 >= 100 ? 1 : 0)}k+` : `${totalJobsCount}`}
+                {currentUser.name || currentUser.email}
               </span>
-            )}
-          </button>
 
-          <button
-            onClick={() => onExploreJobs && onExploreJobs()}
-            className="global-nav-dashboard-btn"
-          >
-            <span>Dashboard</span>
-            <ArrowRight size={14} />
-          </button>
+              <button
+                onClick={() => onExploreJobs && onExploreJobs()}
+                className="global-nav-dashboard-btn"
+              >
+                <span>{currentUser.hasPaid ? 'Dashboard' : 'Continue Search'}</span>
+                <ArrowRight size={14} />
+              </button>
+
+              <button
+                onClick={onSignOut}
+                className="landing-nav-desktop"
+                style={{
+                  padding: '6px 10px',
+                  fontSize: '0.8rem',
+                  color: '#ef4444',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #fecaca',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => onOpenAuth('signin')}
+                className="landing-nav-desktop"
+                style={{
+                  padding: '7px 14px',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  color: '#334155',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = '#94a3b8';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                }}
+              >
+                Sign In
+              </button>
+
+              <button
+                onClick={() => onExploreJobs && onExploreJobs()}
+                className="global-nav-dashboard-btn"
+              >
+                <span>Start Searching</span>
+                <ArrowRight size={14} />
+              </button>
+            </>
+          )}
 
           {/* Mobile Hamburger Menu Button */}
           <button
@@ -216,13 +244,39 @@ export default function GlobalNavbar({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '10px' }}>
-              <button
-                onClick={() => { setMobileMenuOpen(false); onExploreJobs && onExploreJobs(); }}
-                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: '#fff1f2', color: '#780115', border: '1px solid #fecdd3', borderRadius: '8px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', textAlign: 'left' }}
-              >
-                <Briefcase size={16} />
-                <span>Explore Direct Jobs ({totalJobsCount ? totalJobsCount.toLocaleString() : 'Live'})</span>
-              </button>
+              {currentUser?.hasPaid ? (
+                <>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); onExploreJobs && onExploreJobs(); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: '#780115', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <Briefcase size={16} />
+                    <span>Go to Dashboard</span>
+                  </button>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); onSignOut && onSignOut(); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '8px', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <span>Sign Out ({currentUser.name || currentUser.email})</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); onExploreJobs && onExploreJobs(); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: '#780115', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <Briefcase size={16} />
+                    <span>Start Searching</span>
+                  </button>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); onOpenAuth && onOpenAuth('signin'); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '8px', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <span>Sign In</span>
+                  </button>
+                </>
+              )}
 
               <button
                 onClick={() => { setMobileMenuOpen(false); onExploreJobs && onExploreJobs('remote'); }}

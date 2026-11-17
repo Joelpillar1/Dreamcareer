@@ -43,7 +43,7 @@ export default function GlobalFooter({
               />
             </div>
             <p style={{ fontSize: '0.86rem', color: '#64748b', maxWidth: '520px', margin: 0, lineHeight: 1.55 }}>
-              Discover direct tech jobs, company career portals, and verified recruiter contacts from across the ecosystem.
+              Discover direct tech jobs, company career portals, and reachable hiring contacts from across the ecosystem.
             </p>
           </div>
         </div>
@@ -56,7 +56,7 @@ export default function GlobalFooter({
             <div className="segmented-footer-links">
               <a className="segmented-footer-link" onClick={() => handleJobsClick()}>Direct Job Feed</a>
               <a className="segmented-footer-link" onClick={() => handleJobsClick('remote')}>Remote Opportunities</a>
-              <a className="segmented-footer-link" onClick={() => handleJobsClick('email')}>Verified Recruiter Inboxes</a>
+              <a className="segmented-footer-link" onClick={() => handleJobsClick('email')}>Reachable Hiring Contacts</a>
               <a className="segmented-footer-link" href="#features-section">Direct ATS & Portal Sync</a>
               <a className="segmented-footer-link" onClick={() => handleJobsClick('saved')}>Saved Bookmarks</a>
               <a className="segmented-footer-link" href="#features-section">Platform Architecture</a>
