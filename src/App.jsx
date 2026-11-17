@@ -65,79 +65,48 @@ export function getJobTimestamp(job) {
 export function mixCompanies(jobList) {
   if (!jobList || jobList.length <= 1) return jobList || [];
 
-  // Group jobs by normalized company name
+  // Group jobs by normalized company name and cache timestamp once per job
   const companyMap = new Map();
-  for (const job of jobList) {
+  for (let i = 0; i < jobList.length; i++) {
+    const job = jobList[i];
     if (!job) continue;
     const compName = normalizeCompanyName(job.company) || 'Other';
     const compKey = compName.toLowerCase().trim();
-    if (!companyMap.has(compKey)) {
-      companyMap.set(compKey, { name: compKey, jobs: [] });
+    let group = companyMap.get(compKey);
+    if (!group) {
+      group = { name: compKey, jobs: [], head: 0 };
+      companyMap.set(compKey, group);
     }
-    companyMap.get(compKey).jobs.push(job);
+    if (job._ts === undefined) {
+      job._ts = getJobTimestamp(job);
+    }
+    group.jobs.push(job);
   }
 
   // Sort each company queue by date (newest first)
   for (const group of companyMap.values()) {
-    group.jobs.sort((a, b) => getJobTimestamp(b) - getJobTimestamp(a));
+    group.jobs.sort((a, b) => b._ts - a._ts);
   }
 
-  const activeQueues = Array.from(companyMap.values()).filter(g => g.jobs.length > 0);
+  const activeQueues = Array.from(companyMap.values());
+  // Sort company queues so companies with the most recent postings come first
+  activeQueues.sort((a, b) => (b.jobs[0]?._ts || 0) - (a.jobs[0]?._ts || 0));
+
+  let maxQueueLen = 0;
+  for (let i = 0; i < activeQueues.length; i++) {
+    if (activeQueues[i].jobs.length > maxQueueLen) {
+      maxQueueLen = activeQueues[i].jobs.length;
+    }
+  }
+
   const mixed = [];
-  const recentCompanies = [];
-  const RECENT_HISTORY_LEN = 3;
-
-  while (activeQueues.length > 0) {
-    // Avoid repeating any company selected in the recent sliding window
-    const maxRecent = Math.min(RECENT_HISTORY_LEN, activeQueues.length - 1);
-    const bannedKeys = new Set(recentCompanies.slice(-maxRecent));
-
-    let bestQueueIndex = -1;
-    let bestTime = -Infinity;
-
-    // 1. Pick the company with the latest posted/discovered job that isn't recently picked
-    for (let i = 0; i < activeQueues.length; i++) {
-      const q = activeQueues[i];
-      if (!bannedKeys.has(q.name)) {
-        const t = getJobTimestamp(q.jobs[0]);
-        if (t > bestTime) {
-          bestTime = t;
-          bestQueueIndex = i;
-        }
+  // High-performance O(N) round-robin interleaving
+  for (let step = 0; step < maxQueueLen; step++) {
+    for (let q = 0; q < activeQueues.length; q++) {
+      const group = activeQueues[q];
+      if (group.head < group.jobs.length) {
+        mixed.push(group.jobs[group.head++]);
       }
-    }
-
-    // 2. If all remaining queues were recently picked, relax to exclude only the immediately preceding company
-    if (bestQueueIndex === -1) {
-      const lastKey = recentCompanies[recentCompanies.length - 1];
-      for (let i = 0; i < activeQueues.length; i++) {
-        const q = activeQueues[i];
-        if (activeQueues.length === 1 || q.name !== lastKey) {
-          const t = getJobTimestamp(q.jobs[0]);
-          if (t > bestTime) {
-            bestTime = t;
-            bestQueueIndex = i;
-          }
-        }
-      }
-    }
-
-    // 3. Fallback
-    if (bestQueueIndex === -1) {
-      bestQueueIndex = 0;
-    }
-
-    const chosenQueue = activeQueues[bestQueueIndex];
-    const chosenJob = chosenQueue.jobs.shift();
-    mixed.push(chosenJob);
-
-    recentCompanies.push(chosenQueue.name);
-    if (recentCompanies.length > 10) {
-      recentCompanies.shift();
-    }
-
-    if (chosenQueue.jobs.length === 0) {
-      activeQueues.splice(bestQueueIndex, 1);
     }
   }
 
@@ -199,7 +168,10 @@ export default function App() {
   }, [currentView, currentUser]);
 
   useEffect(() => {
-    loadAllData();
+    // Run data fetch in background after the page is painted and interactive
+    const loadTimer = setTimeout(() => {
+      loadAllData();
+    }, 150);
 
     // Check active Supabase session on startup
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -231,6 +203,7 @@ export default function App() {
     window.addEventListener('hashchange', handleUrlChange);
     window.addEventListener('popstate', handleUrlChange);
     return () => {
+      clearTimeout(loadTimer);
       subscription?.unsubscribe();
       window.removeEventListener('hashchange', handleUrlChange);
       window.removeEventListener('popstate', handleUrlChange);
@@ -698,23 +671,25 @@ export default function App() {
   };
 
   // Filtered Jobs
-  // Free-form location strings ("San Francisco, CA | New York City, NY",
-  // "Remote - India") are resolved to canonical countries/regions once per
-  // job, so the sidebar can list every country that actually has roles and
-  // the location filter can match on them (a plain substring test on
-  // job.location misses "San Francisco, CA" when the filter says "United States").
+  // Free-form location strings are resolved to canonical countries/regions.
+  // We only run this when the dashboard is active to keep initial landing and onboarding instantaneous.
   const locationIndex = useMemo(() => {
+    if (currentView !== 'dashboard') return new Map();
     const index = new Map();
     for (const job of jobs) {
       const { countries, regions } = jobGeo(job.location, job.country);
       index.set(job, { countries: countries.map((c) => c.toLowerCase()), regions });
     }
     return index;
-  }, [jobs]);
+  }, [jobs, currentView]);
 
-  const locationLists = useMemo(() => buildLocationLists(jobs), [jobs]);
+  const locationLists = useMemo(() => {
+    if (currentView !== 'dashboard') return { countries: [], regions: [] };
+    return buildLocationLists(jobs);
+  }, [jobs, currentView]);
 
   const filteredJobs = useMemo(() => {
+    if (currentView !== 'dashboard') return [];
     const searchTarget = (keyword || activeTag).toLowerCase().trim();
     const locationTarget = (location || '').toLowerCase().trim();
     const regionTarget = (region || '').toLowerCase().trim();
@@ -760,7 +735,7 @@ export default function App() {
     }
 
     return mixCompanies(filtered);
-  }, [jobs, keyword, activeTag, workplace, location, region, locationIndex, company, hasEmail, onlyBookmarked]);
+  }, [jobs, currentView, keyword, activeTag, workplace, location, region, locationIndex, company, hasEmail, onlyBookmarked]);
 
   const bookmarkedCount = jobs.filter((j) => j.is_bookmarked).length;
 

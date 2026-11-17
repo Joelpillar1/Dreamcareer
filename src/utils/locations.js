@@ -418,12 +418,19 @@ export const COUNTRY_TO_REGIONS = {
   "Côte d'Ivoire": ['africa', 'emea'],
 };
 
+const _jobGeoCache = new Map();
+
 /**
  * Resolve one job's location into canonical countries + regions.
  * Used for BOTH the sidebar counts and the filter so the two always agree.
+ * Cached to prevent running hundreds of regexes repetitively on identical locations.
  * @returns {{countries:string[], regions:string[]}}
  */
 export function jobGeo(location, country) {
+  const cacheKey = (location || '') + '|' + (country || '');
+  const cached = _jobGeoCache.get(cacheKey);
+  if (cached) return cached;
+
   const countries = countriesFromLocation(location, country);
   const textRegions = regionsFromLocation(location).filter(
     (r) => r !== REMOTE_GLOBAL || countries.length === 0
@@ -438,7 +445,9 @@ export function jobGeo(location, country) {
     }
   }
   const regions = Array.from(new Set([...textRegions, ...countryRegions]));
-  return { countries, regions };
+  const result = { countries, regions };
+  _jobGeoCache.set(cacheKey, result);
+  return result;
 }
 
 /**
