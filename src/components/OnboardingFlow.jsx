@@ -5,7 +5,8 @@ import {
   Check, 
   ChevronDown, 
   Plus, 
-  X 
+  X,
+  ExternalLink 
 } from 'lucide-react';
 import CornerPlusMarkers from './CornerPlusMarkers';
 import { WHOP_PLANS } from '../config/whop';
